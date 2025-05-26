@@ -5,12 +5,19 @@ export interface StudySession {
   completed: boolean;
 }
 
+export interface DailyProgress {
+  date: string; // YYYY-MM-DD format
+  totalSeconds: number;
+}
+
 export interface TimerState {
   duration: number; // in seconds
   timeRemaining: number; // in seconds
   isRunning: boolean;
   isPaused: boolean;
   sessions: StudySession[];
+  dailyTarget: number; // in seconds
+  dailyProgress: DailyProgress[];
 
   // Actions
   setDuration: (duration: number) => void;
@@ -19,4 +26,5 @@ export interface TimerState {
   resumeTimer: () => void;
   resetTimer: () => void;
   completeSession: (completed: boolean) => void;
+  setDailyTarget: (hours: number) => void;
 }

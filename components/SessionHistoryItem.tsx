@@ -5,9 +5,10 @@ import { CheckCircle, XCircle, Clock } from 'lucide-react-native';
 
 interface SessionHistoryItemProps {
   session: StudySession;
+  isToday?: boolean;
 }
 
-export default function SessionHistoryItem({ session }: SessionHistoryItemProps) {
+export default function SessionHistoryItem({ session, isToday = false }: SessionHistoryItemProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -37,7 +38,7 @@ export default function SessionHistoryItem({ session }: SessionHistoryItemProps)
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isToday && styles.todayContainer]}>
       <View style={styles.iconContainer}>
         {session.completed ? (
           <CheckCircle color={Colors.light.success} size={24} />
@@ -46,7 +47,7 @@ export default function SessionHistoryItem({ session }: SessionHistoryItemProps)
         )}
       </View>
       <View style={styles.contentContainer}>
-        <Text style={styles.dateText}>{formatDate(session.date)}</Text>
+        <Text style={styles.dateText}>{isToday ? 'Today' : formatDate(session.date)}</Text>
         <View style={styles.detailsRow}>
           <View style={styles.timeContainer}>
             <Clock size={14} color={Colors.light.darkGray} />
@@ -76,6 +77,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 12,
     alignItems: 'center',
+  },
+  todayContainer: {
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.light.primary,
   },
   iconContainer: {
     marginRight: 12,

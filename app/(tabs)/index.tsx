@@ -1,13 +1,17 @@
 import { useEffect, useState, useRef } from 'react';
-import { View, StyleSheet, ScrollView, Text } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import Colors from '~/constants/colors';
 import TimerDisplay from '~/components/TimerDisplay';
 import TimerControls from '~/components/TimerControls';
 import DurationPicker from '~/components/DurationPicker';
 import SessionCompleteModal from '~/components/SessionCompleteModal';
+import DailyTargetModal from '~/components/DailyTargetModal';
+import DailyProgressBar from '~/components/DailyProgressBar';
 import useTimerStore from '~/store/timerStore';
 import { Platform } from 'react-native';
+import { getTodayDateString } from '~/utils/dateUtils';
+import { Target } from 'lucide-react-native';
 
 export default function TimerScreen() {
   const {
@@ -15,6 +19,8 @@ export default function TimerScreen() {
     timeRemaining,
     isRunning,
     isPaused,
+    dailyTarget,
+    dailyProgress,
     setDuration,
     startTimer,
     pauseTimer,
@@ -24,7 +30,13 @@ export default function TimerScreen() {
   } = useTimerStore();
 
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [showTargetModal, setShowTargetModal] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Get today's progress
+  const today = getTodayDateString();
+  const todayProgress = dailyProgress.find((p) => p.date === today);
+  const todaySeconds = todayProgress ? todayProgress.totalSeconds : 0;
 
   // Timer logic
   useEffect(() => {
@@ -76,8 +88,19 @@ export default function TimerScreen() {
       <StatusBar style="dark" />
 
       <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>Focus Time</Text>
-        <Text style={styles.headerSubtitle}>Stay productive and focused</Text>
+        <Text style={styles.headerTitle}>Time to Focus</Text>
+      </View>
+
+      {/* Daily Target Progress */}
+      <View style={styles.targetContainer}>
+        <View style={styles.targetHeader}>
+          <Text style={styles.targetTitle}>Daily Target</Text>
+          <TouchableOpacity style={styles.targetButton} onPress={() => setShowTargetModal(true)}>
+            <Target size={16} color={Colors.light.primary} />
+            <Text style={styles.targetButtonText}>Set Target</Text>
+          </TouchableOpacity>
+        </View>
+        <DailyProgressBar currentSeconds={todaySeconds} targetSeconds={dailyTarget} />
       </View>
 
       {!isRunning && !isPaused && (
@@ -103,6 +126,8 @@ export default function TimerScreen() {
         onClose={() => setShowCompletionModal(false)}
         duration={duration}
       />
+
+      <DailyTargetModal visible={showTargetModal} onClose={() => setShowTargetModal(false)} />
     </ScrollView>
   );
 }
@@ -115,11 +140,11 @@ const styles = StyleSheet.create({
   contentContainer: {
     flexGrow: 1,
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 20 : 40,
+    paddingTop: Platform.OS === 'ios' ? 20 : 20,
     paddingBottom: 40,
   },
   headerContainer: {
-    marginBottom: 30,
+    marginBottom: 20,
     alignItems: 'center',
   },
   headerTitle: {
@@ -131,6 +156,33 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     fontSize: 16,
     color: Colors.light.darkGray,
+  },
+  targetContainer: {
+    backgroundColor: Colors.light.lightGray,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 24,
+  },
+  targetHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  targetTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.light.text,
+  },
+  targetButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  targetButtonText: {
+    fontSize: 14,
+    color: Colors.light.primary,
+    fontWeight: '500',
   },
   timerContainer: {
     alignItems: 'center',
