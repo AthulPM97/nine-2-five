@@ -3,16 +3,17 @@ import { View, StyleSheet, FlatList, Text, TouchableOpacity } from 'react-native
 import { StatusBar } from 'expo-status-bar';
 import Colors from '~/constants/colors';
 import SessionHistoryItem from '~/components/SessionHistoryItem';
-import DailyProgressBar from '~/components/DailyProgressBar';
 import useTimerStore from '~/store/timerStore';
-import { Clock, Calendar, Target } from 'lucide-react-native';
-import { getTodayDateString, formatDisplayDate, isToday } from '~/utils/dateUtils';
+import { Clock, Tag, BarChart } from 'lucide-react-native';
+import { getTodayDateString, isToday } from '~/utils/dateUtils';
 import DailyTargetModal from '~/components/DailyTargetModal';
 import { getLast7DaysTotalSeconds } from '~/utils/historyUtils';
+import TagStatsChart from '~/components/TagStatsChart';
 
 export default function HistoryScreen() {
-  const { sessions, dailyTarget, dailyProgress } = useTimerStore();
+  const { sessions, dailyProgress, getTagStats } = useTimerStore();
   const [showTargetModal, setShowTargetModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<'sessions' | 'subjects'>('sessions');
 
   const totalSeconds = getLast7DaysTotalSeconds(dailyProgress);
   const totalHours = (totalSeconds / 3600).toFixed(2);
@@ -21,6 +22,9 @@ export default function HistoryScreen() {
   const sortedSessions = [...sessions].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
+
+  // Get tag statistics
+  const tagStats = getTagStats();
 
   // Calculate total study time
   const totalStudyTime = sessions.reduce((total, session) => total + session.duration, 0);
@@ -45,11 +49,10 @@ export default function HistoryScreen() {
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
-      <Text style={{ fontWeight: 'bold', fontSize: 18 }}>Last 7 days: {totalHours} hours</Text>
 
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
-          <Text style={styles.statTitle}>Total Study Time</Text>
+          <Text style={styles.statTitle}>Total Study Time Today</Text>
           <View style={styles.statValueContainer}>
             <Clock size={20} color={Colors.light.primary} />
             <Text style={styles.statValue}>{formatTotalTime(totalStudyTime)}</Text>
@@ -63,36 +66,79 @@ export default function HistoryScreen() {
           </View>
 
           <View style={[styles.statCard, styles.smallStatCard]}>
-            <Text style={styles.statTitle}>Completed</Text>
-            <Text style={[styles.statValue, { color: Colors.light.success }]}>
-              {sessions.filter((s) => s.completed).length}
+            <Text style={styles.statTitle}>Subjects</Text>
+            <Text style={[styles.statValue, { color: Colors.light.primary }]}>
+              {tagStats.length}
             </Text>
           </View>
         </View>
+
+        <View style={styles.summaryCard}>
+          <Text style={styles.summaryTitle}>Last 7 days, you spent</Text>
+          <Text style={styles.summaryValue}>{totalHours} hours</Text>
+        </View>
       </View>
 
-      <View style={styles.historyContainer}>
-        <Text style={styles.sectionTitle}>Session History</Text>
-
-        {sortedSessions.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No study sessions yet</Text>
-            <Text style={styles.emptySubtext}>
-              Complete your first study session to see it here
-            </Text>
-          </View>
-        ) : (
-          <FlatList
-            data={sortedSessions}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <SessionHistoryItem session={item} isToday={isToday(item.date.split('T')[0])} />
-            )}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.listContent}
+      {/* Tab selector */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tabButton, activeTab === 'sessions' && styles.activeTabButton]}
+          onPress={() => setActiveTab('sessions')}>
+          <Clock
+            size={18}
+            color={activeTab === 'sessions' ? Colors.light.primary : Colors.light.darkGray}
           />
-        )}
+          <Text style={[styles.tabText, activeTab === 'sessions' && styles.activeTabText]}>
+            Sessions
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.tabButton, activeTab === 'subjects' && styles.activeTabButton]}
+          onPress={() => setActiveTab('subjects')}>
+          <Tag
+            size={18}
+            color={activeTab === 'subjects' ? Colors.light.primary : Colors.light.darkGray}
+          />
+          <Text style={[styles.tabText, activeTab === 'subjects' && styles.activeTabText]}>
+            Subjects
+          </Text>
+        </TouchableOpacity>
       </View>
+
+      {activeTab === 'sessions' ? (
+        <View style={styles.historyContainer}>
+          <Text style={styles.sectionTitle}>Session History</Text>
+
+          {sortedSessions.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No study sessions yet</Text>
+              <Text style={styles.emptySubtext}>
+                Complete your first study session to see it here
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              data={sortedSessions}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <SessionHistoryItem session={item} isToday={isToday(item.date.split('T')[0])} />
+              )}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.listContent}
+            />
+          )}
+        </View>
+      ) : (
+        <View style={styles.historyContainer}>
+          <View style={styles.subjectHeaderContainer}>
+            <Text style={styles.sectionTitle}>Subject Breakdown</Text>
+            <BarChart size={20} color={Colors.light.darkGray} />
+          </View>
+
+          <TagStatsChart tagStats={tagStats} />
+        </View>
+      )}
 
       <DailyTargetModal visible={showTargetModal} onClose={() => setShowTargetModal(false)} />
     </View>
@@ -169,8 +215,41 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.light.text,
   },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: Colors.light.lightGray,
+    borderRadius: 12,
+    marginBottom: 20,
+    padding: 4,
+  },
+  tabButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    gap: 8,
+    borderRadius: 8,
+  },
+  activeTabButton: {
+    backgroundColor: Colors.light.background,
+  },
+  tabText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: Colors.light.darkGray,
+  },
+  activeTabText: {
+    color: Colors.light.text,
+  },
   historyContainer: {
     flex: 1,
+  },
+  subjectHeaderContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 18,
@@ -197,5 +276,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.light.darkGray,
     textAlign: 'center',
+  },
+  summaryCard: {
+    backgroundColor: Colors.light.lightGray,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  summaryTitle: {
+    fontSize: 14,
+    color: Colors.light.darkGray,
+    marginBottom: 4,
+    fontWeight: '500',
+  },
+  summaryValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.light.text,
   },
 });

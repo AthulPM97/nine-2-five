@@ -1,11 +1,12 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { TimerState, StudySession, DailyProgress } from '~/types/timer';
+import { TimerState, StudySession, TagStats } from '~/types/timer';
 
 const MAX_DURATION = 7200; // 2 hours in seconds
 const MIN_DAILY_TARGET = 4 * 60 * 60; // 4 hours in seconds
 const MAX_DAILY_TARGET = 9 * 60 * 60; // 9 hours in seconds
+const MAX_RECENT_TAGS = 5; // Maximum number of recent tags to store
 
 // Helper to get today's date in YYYY-MM-DD format
 const getTodayDateString = () => {
@@ -23,6 +24,8 @@ const useTimerStore = create<TimerState>()(
       sessions: [],
       dailyTarget: 4 * 60 * 60, // Default 4 hours
       dailyProgress: [],
+      currentTag: '',
+      recentTags: [],
 
       setDuration: (duration) => {
         const validDuration = Math.min(duration, MAX_DURATION);
@@ -63,11 +66,14 @@ const useTimerStore = create<TimerState>()(
 
       completeSession: (completed) => {
         const sessionDuration = get().duration - get().timeRemaining;
+        const currentTag = get().currentTag || 'Untagged';
+
         const newSession: StudySession = {
           id: Date.now().toString(),
           date: new Date().toISOString(),
           duration: sessionDuration,
           completed,
+          tag: currentTag,
         };
 
         // Update daily progress
@@ -91,12 +97,20 @@ const useTimerStore = create<TimerState>()(
           });
         }
 
+        // Update recent tags
+        const recentTags = get().recentTags;
+        let updatedRecentTags = recentTags.filter((tag) => tag !== currentTag); // Remove current tag if exists
+        updatedRecentTags.unshift(currentTag); // Add current tag to the beginning
+        updatedRecentTags = updatedRecentTags.slice(0, MAX_RECENT_TAGS); // Keep only the most recent tags
+
         set((state) => ({
           sessions: [...state.sessions, newSession],
           dailyProgress: updatedProgress,
           timeRemaining: state.duration,
           isRunning: false,
           isPaused: false,
+          recentTags: updatedRecentTags,
+          currentTag: '', // Reset current tag
         }));
       },
 
@@ -108,6 +122,34 @@ const useTimerStore = create<TimerState>()(
         );
 
         set({ dailyTarget: targetInSeconds });
+      },
+
+      setCurrentTag: (tag) => {
+        set({ currentTag: tag });
+      },
+
+      getTagStats: () => {
+        const sessions = get().sessions;
+        const tagMap = new Map<string, { totalSeconds: number; sessionCount: number }>();
+
+        sessions.forEach((session) => {
+          const tag = session.tag || 'Untagged';
+          const current = tagMap.get(tag) || { totalSeconds: 0, sessionCount: 0 };
+
+          tagMap.set(tag, {
+            totalSeconds: current.totalSeconds + session.duration,
+            sessionCount: current.sessionCount + 1,
+          });
+        });
+
+        const tagStats: TagStats[] = Array.from(tagMap.entries()).map(([tag, stats]) => ({
+          tag,
+          totalSeconds: stats.totalSeconds,
+          sessionCount: stats.sessionCount,
+        }));
+
+        // Sort by total time (descending)
+        return tagStats.sort((a, b) => b.totalSeconds - a.totalSeconds);
       },
     }),
     {

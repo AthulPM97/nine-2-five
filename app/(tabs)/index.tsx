@@ -11,7 +11,8 @@ import DailyProgressBar from '~/components/DailyProgressBar';
 import useTimerStore from '~/store/timerStore';
 import { Platform } from 'react-native';
 import { getTodayDateString } from '~/utils/dateUtils';
-import { Target } from 'lucide-react-native';
+import { Target, Tag } from 'lucide-react-native';
+import TagSelectorModal from '~/components/TagSelectorModal';
 
 export default function TimerScreen() {
   const {
@@ -21,6 +22,7 @@ export default function TimerScreen() {
     isPaused,
     dailyTarget,
     dailyProgress,
+    currentTag,
     setDuration,
     startTimer,
     pauseTimer,
@@ -31,6 +33,7 @@ export default function TimerScreen() {
 
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [showTargetModal, setShowTargetModal] = useState(false);
+  const [showTagModal, setShowTagModal] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Get today's progress
@@ -80,6 +83,15 @@ export default function TimerScreen() {
     completeSession(false);
   };
 
+  const handleStartTimer = () => {
+    setShowTagModal(true);
+  };
+
+  const handleTagSelected = () => {
+    setShowTagModal(false);
+    startTimer();
+  };
+
   return (
     <ScrollView
       style={styles.container}
@@ -88,7 +100,8 @@ export default function TimerScreen() {
       <StatusBar style="dark" />
 
       <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>Time to Focus</Text>
+        <Text style={styles.headerTitle}>Focus Time</Text>
+        <Text style={styles.headerSubtitle}>Stay productive and focused</Text>
       </View>
 
       {/* Daily Target Progress */}
@@ -107,6 +120,14 @@ export default function TimerScreen() {
         <DurationPicker onSelectDuration={handleDurationChange} selectedDuration={duration} />
       )}
 
+      {/* Current subject tag display */}
+      {currentTag && (isRunning || isPaused) && (
+        <View style={styles.currentTagContainer}>
+          <Tag size={16} color={Colors.light.primary} />
+          <Text style={styles.currentTagText}>Studying: {currentTag}</Text>
+        </View>
+      )}
+
       <View style={styles.timerContainer}>
         <TimerDisplay timeRemaining={timeRemaining} duration={duration} />
       </View>
@@ -114,7 +135,7 @@ export default function TimerScreen() {
       <TimerControls
         isRunning={isRunning}
         isPaused={isPaused}
-        onStart={startTimer}
+        onStart={handleStartTimer}
         onPause={pauseTimer}
         onResume={resumeTimer}
         onReset={resetTimer}
@@ -128,6 +149,12 @@ export default function TimerScreen() {
       />
 
       <DailyTargetModal visible={showTargetModal} onClose={() => setShowTargetModal(false)} />
+
+      <TagSelectorModal
+        visible={showTagModal}
+        onClose={() => setShowTagModal(false)}
+        onTagSelected={handleTagSelected}
+      />
     </ScrollView>
   );
 }
@@ -140,7 +167,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     flexGrow: 1,
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 20 : 20,
+    paddingTop: Platform.OS === 'ios' ? 20 : 0,
     paddingBottom: 40,
   },
   headerContainer: {
@@ -183,6 +210,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.light.primary,
     fontWeight: '500',
+  },
+  currentTagContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.light.lightGray,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    alignSelf: 'center',
+    marginBottom: 40,
+    gap: 6,
+  },
+  currentTagText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: Colors.light.text,
   },
   timerContainer: {
     alignItems: 'center',
