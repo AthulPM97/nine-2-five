@@ -8,10 +8,14 @@ import useTimerStore from '~/store/timerStore';
 import { Clock, Calendar, Target } from 'lucide-react-native';
 import { getTodayDateString, formatDisplayDate, isToday } from '~/utils/dateUtils';
 import DailyTargetModal from '~/components/DailyTargetModal';
+import { getLast7DaysTotalSeconds } from '~/utils/historyUtils';
 
 export default function HistoryScreen() {
   const { sessions, dailyTarget, dailyProgress } = useTimerStore();
   const [showTargetModal, setShowTargetModal] = useState(false);
+
+  const totalSeconds = getLast7DaysTotalSeconds(dailyProgress);
+  const totalHours = (totalSeconds / 3600).toFixed(2);
 
   // Sort sessions by date (newest first)
   const sortedSessions = [...sessions].sort(
@@ -41,21 +45,7 @@ export default function HistoryScreen() {
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
-
-      <View style={styles.todayContainer}>
-        <View style={styles.todayHeader}>
-          <View style={styles.todayTitleContainer}>
-            <Calendar size={18} color={Colors.light.primary} />
-            <Text style={styles.todayTitle}>{formatDisplayDate(today)}</Text>
-          </View>
-          <TouchableOpacity style={styles.targetButton} onPress={() => setShowTargetModal(true)}>
-            <Target size={16} color={Colors.light.primary} />
-            <Text style={styles.targetButtonText}>Set Target</Text>
-          </TouchableOpacity>
-        </View>
-
-        <DailyProgressBar currentSeconds={todaySeconds} targetSeconds={dailyTarget} />
-      </View>
+      <Text style={{ fontWeight: 'bold', fontSize: 18 }}>Last 7 days: {totalHours} hours</Text>
 
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
