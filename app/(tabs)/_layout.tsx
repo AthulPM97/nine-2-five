@@ -1,6 +1,7 @@
-import { Tabs } from 'expo-router';
+import { Tabs, Link } from 'expo-router';
 import Colors from '~/constants/colors';
 import { Clock, BarChart } from 'lucide-react-native';
+import { HeaderButton } from '~/components/HeaderButton';
 
 export default function TabLayout() {
   return (
@@ -32,6 +33,11 @@ export default function TabLayout() {
         options={{
           title: 'History',
           tabBarIcon: ({ color }) => <BarChart size={24} color={color} />,
+          headerRight: () => (
+            <Link href="/modal" asChild>
+              <HeaderButton />
+            </Link>
+          ),
         }}
       />
     </Tabs>

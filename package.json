@@ -44,7 +44,9 @@
     "tamagui": "^1.125.8",
     "zustand": "^4.5.1",
     "expo-dev-client": "~5.1.8",
-    "react-native-svg": "15.11.2"
+    "react-native-svg": "15.11.2",
+    "expo-file-system": "~18.1.10",
+    "expo-sharing": "~13.1.5"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

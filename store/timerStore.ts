@@ -11,6 +11,7 @@ import {
 } from './backgroundTasks';
 import {
   completeSessionSelector,
+  exportDataSelector,
   getTagStats,
   syncTimerWithRealTimeSelector,
 } from './timerSelectors';
@@ -117,6 +118,10 @@ const useTimerStore = create<TimerState>()(
       // Method to sync timer with real time when app comes back from background
       syncTimerWithRealTime: () => {
         syncTimerWithRealTimeSelector(get, set);
+      },
+
+      exportData: async () => {
+        return await exportDataSelector(get);
       },
     }),
     {

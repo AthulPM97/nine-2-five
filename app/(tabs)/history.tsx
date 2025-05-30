@@ -6,13 +6,15 @@ import SessionHistoryItem from '~/components/SessionHistoryItem';
 import useTimerStore from '~/store/timerStore';
 import { Clock, Tag, BarChart } from 'lucide-react-native';
 import { getTodayDateString, isToday } from '~/utils/dateUtils';
-import DailyTargetModal from '~/components/DailyTargetModal';
 import { getLast7DaysTotalSeconds } from '~/utils/historyUtils';
 import TagStatsChart from '~/components/TagStatsChart';
+import { formatTotalTime } from '~/utils/formatTime';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import { Platform, Alert } from 'react-native';
 
 export default function HistoryScreen() {
-  const { sessions, dailyProgress, getTagStats } = useTimerStore();
-  const [showTargetModal, setShowTargetModal] = useState(false);
+  const { sessions, dailyProgress, getTagStats, exportData } = useTimerStore();
   const [activeTab, setActiveTab] = useState<'sessions' | 'subjects'>('sessions');
 
   const totalSeconds = getLast7DaysTotalSeconds(dailyProgress);
@@ -26,23 +28,43 @@ export default function HistoryScreen() {
   // Get tag statistics
   const tagStats = getTagStats();
 
-  // Calculate total study time
-  const totalStudyTime = sessions.reduce((total, session) => total + session.duration, 0);
-
-  // Get today's progress
+  // Calculate total study time for today only
   const today = getTodayDateString();
-  const todayProgress = dailyProgress.find((p) => p.date === today);
-  const todaySeconds = todayProgress ? todayProgress.totalSeconds : 0;
+  const todaySessions = sessions.filter((session) => session.date.split('T')[0] === today);
+  const totalStudyTime = todaySessions.reduce((total, session) => total + session.duration, 0);
 
-  // Format total study time
-  const formatTotalTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    if (mins < 60) {
-      return `${mins} minutes`;
-    } else {
-      const hours = Math.floor(mins / 60);
-      const remainingMins = mins % 60;
-      return `${hours} hour${hours !== 1 ? 's' : ''} ${remainingMins > 0 ? `${remainingMins} minute${remainingMins !== 1 ? 's' : ''}` : ''}`;
+  // Download/export handler
+  const handleExportData = async () => {
+    try {
+      const json = await exportData();
+      const fileName = `study-timer-export-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+      const fileUri = FileSystem.cacheDirectory + fileName;
+
+      await FileSystem.writeAsStringAsync(fileUri, json, {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
+
+      if (Platform.OS === 'android' || Platform.OS === 'ios') {
+        if (await Sharing.isAvailableAsync()) {
+          await Sharing.shareAsync(fileUri, {
+            mimeType: 'application/json',
+            dialogTitle: 'Export Study Data',
+          });
+        } else {
+          Alert.alert('Sharing not available', 'Cannot share file on this device.');
+        }
+      } else {
+        // Web fallback: download as blob
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch (err) {
+      Alert.alert('Export failed', 'Could not export data: ' + (err as Error).message);
     }
   };
 
@@ -61,12 +83,12 @@ export default function HistoryScreen() {
 
         <View style={styles.statRow}>
           <View style={[styles.statCard, styles.smallStatCard]}>
-            <Text style={styles.statTitle}>Sessions</Text>
-            <Text style={styles.statValue}>{sessions.length}</Text>
+            <Text style={styles.statTitle}>Sessions Today</Text>
+            <Text style={styles.statValue}>{todaySessions.length}</Text>
           </View>
 
           <View style={[styles.statCard, styles.smallStatCard]}>
-            <Text style={styles.statTitle}>Subjects</Text>
+            <Text style={styles.statTitle}>Total Subjects</Text>
             <Text style={[styles.statValue, { color: Colors.light.primary }]}>
               {tagStats.length}
             </Text>
@@ -140,7 +162,7 @@ export default function HistoryScreen() {
         </View>
       )}
 
-      <DailyTargetModal visible={showTargetModal} onClose={() => setShowTargetModal(false)} />
+      {/* <DailyTargetModal visible={showTargetModal} onClose={() => setShowTargetModal(false)} /> */}
     </View>
   );
 }

@@ -108,3 +108,16 @@ export function syncTimerWithRealTimeSelector(get: any, set: any) {
     }
   }
 }
+
+export async function exportDataSelector(get: any) {
+  const { sessions, dailyProgress, recentTags, currentTag, dailyTarget } = get();
+  const exportObj = {
+    sessions,
+    dailyProgress,
+    recentTags,
+    currentTag,
+    dailyTarget,
+    exportedAt: new Date().toISOString(),
+  };
+  return JSON.stringify(exportObj, null, 2);
+}

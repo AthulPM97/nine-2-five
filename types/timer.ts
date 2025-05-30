@@ -41,4 +41,5 @@ export interface TimerState {
   getTagStats: () => TagStats[];
   setBackgroundMode: (isBackground: boolean) => void;
   syncTimerWithRealTime: () => void;
+  exportData: () => any;
 }
