@@ -1,17 +1,20 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { TimerState, StudySession, DailyProgress } from '~/types/timer';
-
-const MAX_DURATION = 7200; // 2 hours in seconds
-const MIN_DAILY_TARGET = 4 * 60 * 60; // 4 hours in seconds
-const MAX_DAILY_TARGET = 9 * 60 * 60; // 9 hours in seconds
-
-// Helper to get today's date in YYYY-MM-DD format
-const getTodayDateString = () => {
-  const today = new Date();
-  return today.toISOString().split('T')[0];
-};
+import { TimerState, StudySession } from '~/types/timer';
+import { Platform } from 'react-native';
+import { MAX_DURATION, MIN_DAILY_TARGET, MAX_DAILY_TARGET } from './timerConstants';
+import {
+  defineBackgroundTask,
+  registerBackgroundTask,
+  unregisterBackgroundTask,
+} from './backgroundTasks';
+import {
+  completeSessionSelector,
+  exportDataSelector,
+  getTagStats,
+  syncTimerWithRealTimeSelector,
+} from './timerSelectors';
 
 const useTimerStore = create<TimerState>()(
   persist(
@@ -20,9 +23,13 @@ const useTimerStore = create<TimerState>()(
       timeRemaining: 1500,
       isRunning: false,
       isPaused: false,
-      sessions: [],
+      sessions: [] as StudySession[],
       dailyTarget: 4 * 60 * 60, // Default 4 hours
       dailyProgress: [],
+      currentTag: '',
+      recentTags: [],
+      isBackgroundMode: false,
+      lastUpdatedTime: Date.now(),
 
       setDuration: (duration) => {
         const validDuration = Math.min(duration, MAX_DURATION);
@@ -32,72 +39,60 @@ const useTimerStore = create<TimerState>()(
         });
       },
 
-      startTimer: () => {
+      startTimer: async () => {
+        // Register background task when timer starts
+        if (Platform.OS !== 'web') {
+          await registerBackgroundTask();
+        }
+
         set({
           isRunning: true,
           isPaused: false,
+          lastUpdatedTime: Date.now(),
         });
       },
 
-      pauseTimer: () => {
+      pauseTimer: async () => {
+        // Unregister background task when timer pauses
+        if (Platform.OS !== 'web') {
+          await unregisterBackgroundTask();
+        }
+
         set({
           isRunning: false,
           isPaused: true,
         });
       },
 
-      resumeTimer: () => {
+      resumeTimer: async () => {
+        // Re-register background task when timer resumes
+        if (Platform.OS !== 'web') {
+          await registerBackgroundTask();
+        }
+
         set({
           isRunning: true,
           isPaused: false,
+          lastUpdatedTime: Date.now(),
         });
       },
 
-      resetTimer: () => {
+      resetTimer: async () => {
+        // Unregister background task when timer resets
+        if (Platform.OS !== 'web') {
+          await unregisterBackgroundTask();
+        }
+
         set({
           timeRemaining: get().duration,
           isRunning: false,
           isPaused: false,
+          isBackgroundMode: false,
         });
       },
 
-      completeSession: (completed) => {
-        const sessionDuration = get().duration - get().timeRemaining;
-        const newSession: StudySession = {
-          id: Date.now().toString(),
-          date: new Date().toISOString(),
-          duration: sessionDuration,
-          completed,
-        };
-
-        // Update daily progress
-        const today = getTodayDateString();
-        const currentProgress = get().dailyProgress;
-        const todayProgressIndex = currentProgress.findIndex((p) => p.date === today);
-
-        let updatedProgress = [...currentProgress];
-
-        if (todayProgressIndex >= 0) {
-          // Update existing progress for today
-          updatedProgress[todayProgressIndex] = {
-            ...updatedProgress[todayProgressIndex],
-            totalSeconds: updatedProgress[todayProgressIndex].totalSeconds + sessionDuration,
-          };
-        } else {
-          // Add new progress entry for today
-          updatedProgress.push({
-            date: today,
-            totalSeconds: sessionDuration,
-          });
-        }
-
-        set((state) => ({
-          sessions: [...state.sessions, newSession],
-          dailyProgress: updatedProgress,
-          timeRemaining: state.duration,
-          isRunning: false,
-          isPaused: false,
-        }));
+      completeSession: async (completed) => {
+        await completeSessionSelector(get, set, completed);
       },
 
       setDailyTarget: (hours) => {
@@ -109,6 +104,25 @@ const useTimerStore = create<TimerState>()(
 
         set({ dailyTarget: targetInSeconds });
       },
+
+      setCurrentTag: (tag) => {
+        set({ currentTag: tag });
+      },
+
+      getTagStats: () => getTagStats(get().sessions),
+
+      setBackgroundMode: (isBackground) => {
+        set({ isBackgroundMode: isBackground });
+      },
+
+      // Method to sync timer with real time when app comes back from background
+      syncTimerWithRealTime: () => {
+        syncTimerWithRealTimeSelector(get, set);
+      },
+
+      exportData: async () => {
+        return await exportDataSelector(get);
+      },
     }),
     {
       name: 'study-timer-storage',
@@ -116,5 +130,7 @@ const useTimerStore = create<TimerState>()(
     }
   )
 );
+
+defineBackgroundTask(useTimerStore);
 
 export default useTimerStore;

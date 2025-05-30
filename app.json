@@ -30,6 +30,13 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "package": "com.chandlerbong.nine2five"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "44a7cba6-95c3-421a-b34f-0016a7ee207b"
       }
     }
   }

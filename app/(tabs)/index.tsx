@@ -9,9 +9,10 @@ import SessionCompleteModal from '~/components/SessionCompleteModal';
 import DailyTargetModal from '~/components/DailyTargetModal';
 import DailyProgressBar from '~/components/DailyProgressBar';
 import useTimerStore from '~/store/timerStore';
-import { Platform } from 'react-native';
+import { Platform, AppState } from 'react-native';
 import { getTodayDateString } from '~/utils/dateUtils';
-import { Target } from 'lucide-react-native';
+import { Target, Tag, Bell } from 'lucide-react-native';
+import TagSelectorModal from '~/components/TagSelectorModal';
 
 export default function TimerScreen() {
   const {
@@ -21,26 +22,46 @@ export default function TimerScreen() {
     isPaused,
     dailyTarget,
     dailyProgress,
+    currentTag,
+    isBackgroundMode,
     setDuration,
     startTimer,
     pauseTimer,
     resumeTimer,
     resetTimer,
     completeSession,
+    syncTimerWithRealTime,
   } = useTimerStore();
 
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [showTargetModal, setShowTargetModal] = useState(false);
+  const [showTagModal, setShowTagModal] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const appState = useRef(AppState.currentState);
 
   // Get today's progress
   const today = getTodayDateString();
   const todayProgress = dailyProgress.find((p) => p.date === today);
   const todaySeconds = todayProgress ? todayProgress.totalSeconds : 0;
 
+  // Sync timer with real time when app becomes active
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        // App has come to the foreground
+        syncTimerWithRealTime();
+      }
+      appState.current = nextAppState;
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [syncTimerWithRealTime]);
+
   // Timer logic
   useEffect(() => {
-    if (isRunning) {
+    if (isRunning && !isPaused && !isBackgroundMode) {
       timerRef.current = setInterval(() => {
         useTimerStore.setState((state) => {
           const newTimeRemaining = Math.max(0, state.timeRemaining - 1);
@@ -53,7 +74,7 @@ export default function TimerScreen() {
             return { timeRemaining: 0, isRunning: false };
           }
 
-          return { timeRemaining: newTimeRemaining };
+          return { timeRemaining: newTimeRemaining, lastUpdatedTime: Date.now() };
         });
       }, 1000);
     } else if (timerRef.current) {
@@ -65,7 +86,7 @@ export default function TimerScreen() {
         clearInterval(timerRef.current);
       }
     };
-  }, [isRunning]);
+  }, [isRunning, isPaused, isBackgroundMode]);
 
   const handleDurationChange = (newDuration: number) => {
     if (!isRunning && !isPaused) {
@@ -80,6 +101,15 @@ export default function TimerScreen() {
     completeSession(false);
   };
 
+  const handleStartTimer = () => {
+    setShowTagModal(true);
+  };
+
+  const handleTagSelected = () => {
+    setShowTagModal(false);
+    startTimer();
+  };
+
   return (
     <ScrollView
       style={styles.container}
@@ -88,7 +118,8 @@ export default function TimerScreen() {
       <StatusBar style="dark" />
 
       <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>Time to Focus</Text>
+        <Text style={styles.headerTitle}>Focus Time</Text>
+        <Text style={styles.headerSubtitle}>Stay productive and focused</Text>
       </View>
 
       {/* Daily Target Progress */}
@@ -107,14 +138,35 @@ export default function TimerScreen() {
         <DurationPicker onSelectDuration={handleDurationChange} selectedDuration={duration} />
       )}
 
+      {/* Current subject tag display */}
+      {currentTag && (isRunning || isPaused) && (
+        <View style={styles.currentTagContainer}>
+          <Tag size={16} color={Colors.light.primary} />
+          <Text style={styles.currentTagText}>Studying: {currentTag}</Text>
+        </View>
+      )}
+
+      {/* Background mode indicator */}
+      {isBackgroundMode && (
+        <View style={styles.backgroundModeContainer}>
+          <Bell size={16} color={Colors.light.primary} />
+          <Text style={styles.backgroundModeText}>Timer running in background</Text>
+        </View>
+      )}
+
       <View style={styles.timerContainer}>
-        <TimerDisplay timeRemaining={timeRemaining} duration={duration} />
+        <TimerDisplay
+          timeRemaining={timeRemaining}
+          duration={duration}
+          isBackgroundMode={isBackgroundMode}
+        />
       </View>
 
       <TimerControls
         isRunning={isRunning}
         isPaused={isPaused}
-        onStart={startTimer}
+        isBackgroundMode={isBackgroundMode}
+        onStart={handleStartTimer}
         onPause={pauseTimer}
         onResume={resumeTimer}
         onReset={resetTimer}
@@ -128,6 +180,12 @@ export default function TimerScreen() {
       />
 
       <DailyTargetModal visible={showTargetModal} onClose={() => setShowTargetModal(false)} />
+
+      <TagSelectorModal
+        visible={showTagModal}
+        onClose={() => setShowTagModal(false)}
+        onTagSelected={handleTagSelected}
+      />
     </ScrollView>
   );
 }
@@ -140,7 +198,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     flexGrow: 1,
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 20 : 20,
+    paddingTop: Platform.OS === 'ios' ? 20 : 0,
     paddingBottom: 40,
   },
   headerContainer: {
@@ -183,6 +241,40 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.light.primary,
     fontWeight: '500',
+  },
+  currentTagContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.light.lightGray,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    alignSelf: 'center',
+    marginBottom: 40,
+    gap: 6,
+  },
+  currentTagText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: Colors.light.text,
+  },
+  backgroundModeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.light.lightGray,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    alignSelf: 'center',
+    marginBottom: 16,
+    gap: 6,
+  },
+  backgroundModeText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: Colors.light.primary,
   },
   timerContainer: {
     alignItems: 'center',

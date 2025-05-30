@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { StudySession } from '~/types/timer';
 import Colors from '~/constants/colors';
-import { CheckCircle, XCircle, Clock } from 'lucide-react-native';
+import { CheckCircle, XCircle, Clock, Tag } from 'lucide-react-native';
 
 interface SessionHistoryItemProps {
   session: StudySession;
@@ -55,6 +55,12 @@ export default function SessionHistoryItem({ session, isToday = false }: Session
           </View>
           <Text style={styles.durationText}>{formatDuration(session.duration)}</Text>
         </View>
+        {session.tag && (
+          <View style={styles.tagContainer}>
+            <Tag size={14} color={Colors.light.primary} />
+            <Text style={styles.tagText}>{session.tag}</Text>
+          </View>
+        )}
       </View>
       <View style={styles.statusContainer}>
         <Text
@@ -97,6 +103,7 @@ const styles = StyleSheet.create({
   detailsRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 4,
   },
   timeContainer: {
     flexDirection: 'row',
@@ -112,6 +119,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.light.darkGray,
     fontWeight: '500',
+  },
+  tagContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  tagText: {
+    fontSize: 14,
+    color: Colors.light.primary,
+    fontWeight: '500',
+    marginLeft: 4,
   },
   statusContainer: {
     paddingHorizontal: 10,
