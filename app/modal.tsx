@@ -6,9 +6,51 @@ import useTimerStore from '~/store/timerStore';
 import Colors from '~/constants/colors';
 import { View } from 'tamagui';
 import { Download } from 'lucide-react-native';
+import useColorSchemeStore, { ColorScheme } from '~/store/colorSchemeStore';
+
+// Function to generate styles based on colorScheme
+const getStyles = (colorScheme: ColorScheme) => {
+  const currentColors = Colors[colorScheme];
+
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: currentColors.background,
+      padding: 20,
+    },
+    button: {
+      backgroundColor: currentColors.primary,
+      padding: 12,
+      borderRadius: 10,
+      justifyContent: 'space-evenly',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    buttonText: {
+      color: currentColors.background, // Assuming button text is background color of the scheme
+      fontWeight: '600',
+      fontSize: 16,
+    },
+    title: {
+      fontSize: 14,
+      color: currentColors.darkGray, // Assuming darkGray exists in both schemes
+      marginBottom: 8,
+    },
+    buttonContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+  });
+};
 
 export default function Modal() {
   const { exportData } = useTimerStore();
+  const { colorScheme, toggleColorScheme } = useColorSchemeStore();
+
+  // Get the styles based on the current colorScheme
+  const styles = getStyles(colorScheme);
+
   // Download/export handler
   const handleExportData = async () => {
     try {
@@ -43,42 +85,25 @@ export default function Modal() {
       Alert.alert('Export failed', 'Could not export data: ' + (err as Error).message);
     }
   };
+
   return (
     <View style={styles.container}>
       {/* <Text style={styles.title}>Download your data</Text> */}
       <TouchableOpacity style={styles.button} onPress={handleExportData}>
         <View style={styles.buttonContainer}>
-          <Download />
+          <Download color={styles.buttonText.color} />
           <Text style={styles.buttonText}>Save your data</Text>
         </View>
+      </TouchableOpacity>
+
+      {/* Dark mode toggle */}
+      <TouchableOpacity
+        style={styles.button} // Now using the dynamically created button style
+        onPress={toggleColorScheme}>
+        <Text style={styles.buttonText}>
+          {colorScheme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        </Text>
       </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.light.background,
-    padding: 20,
-  },
-  button: {
-    backgroundColor: Colors.light.primary,
-    padding: 12,
-    borderRadius: 10,
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  buttonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
-  title: {
-    fontSize: 14,
-    color: Colors.light.darkGray,
-    marginBottom: 8,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-});

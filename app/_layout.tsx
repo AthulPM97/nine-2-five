@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { TamaguiProvider } from 'tamagui';
 import { SplashScreen, Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
+import useColorSchemeStore from '~/store/colorSchemeStore';
 
 import config from '../tamagui.config';
 
@@ -9,6 +10,7 @@ import config from '../tamagui.config';
 import { AppState, Platform } from 'react-native';
 import useTimerStore from '~/store/timerStore';
 import * as KeepAwake from 'expo-keep-awake';
+import Colors from '~/constants/colors';
 // ----------------------------------------------------------
 
 SplashScreen.preventAutoHideAsync();
@@ -22,6 +24,8 @@ export default function RootLayout() {
     Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
     InterBold: require('@tamagui/font-inter/otf/Inter-Bold.otf'),
   });
+
+  const colorScheme = useColorSchemeStore((s) => s.colorScheme);
 
   // --- App state and background handling logic START ---
   const { isRunning, isPaused, setBackgroundMode, syncTimerWithRealTime } = useTimerStore();
@@ -71,10 +75,18 @@ export default function RootLayout() {
   if (!loaded) return null;
 
   return (
-    <TamaguiProvider config={config}>
+    <TamaguiProvider config={config} defaultTheme={colorScheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Settings' }} />
+        <Stack.Screen
+          name="modal"
+          options={{
+            presentation: 'modal',
+            title: 'Settings',
+            headerStyle: { backgroundColor: Colors[colorScheme].background },
+            headerTintColor: Colors[colorScheme].text,
+          }}
+        />
       </Stack>
     </TamaguiProvider>
   );
