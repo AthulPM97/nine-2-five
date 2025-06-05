@@ -3,53 +3,16 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { Platform, Alert } from 'react-native';
 import useTimerStore from '~/store/timerStore';
-import Colors from '~/constants/colors';
-import { View } from 'tamagui';
+// import Colors from '~/constants/colors'; // No longer needed
+import { View } from 'tamagui'; // Make sure this is a Tamagui View
 import { Download } from 'lucide-react-native';
-import useColorSchemeStore, { ColorScheme } from '~/store/colorSchemeStore';
-
-// Function to generate styles based on colorScheme
-const getStyles = (colorScheme: ColorScheme) => {
-  const currentColors = Colors[colorScheme];
-
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: currentColors.background,
-      padding: 20,
-    },
-    button: {
-      backgroundColor: currentColors.primary,
-      padding: 12,
-      borderRadius: 10,
-      justifyContent: 'space-evenly',
-      alignItems: 'center',
-      marginBottom: 16,
-    },
-    buttonText: {
-      color: currentColors.background, // Assuming button text is background color of the scheme
-      fontWeight: '600',
-      fontSize: 16,
-    },
-    title: {
-      fontSize: 14,
-      color: currentColors.darkGray, // Assuming darkGray exists in both schemes
-      marginBottom: 8,
-    },
-    buttonContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-    },
-  });
-};
+import useColorSchemeStore from '~/store/colorSchemeStore';
+import { useTheme } from 'tamagui'; // Import useTheme from Tamagui
 
 export default function Modal() {
   const { exportData } = useTimerStore();
   const { colorScheme, toggleColorScheme } = useColorSchemeStore();
-
-  // Get the styles based on the current colorScheme
-  const styles = getStyles(colorScheme);
+  const theme = useTheme(); // Get the current Tamagui theme object
 
   // Download/export handler
   const handleExportData = async () => {
@@ -88,22 +51,52 @@ export default function Modal() {
 
   return (
     <View style={styles.container}>
-      {/* <Text style={styles.title}>Download your data</Text> */}
-      <TouchableOpacity style={styles.button} onPress={handleExportData}>
+      {/* The `Download` icon can now get its color from the theme directly */}
+      <TouchableOpacity
+        style={[styles.button, { backgroundColor: theme.primary.get() }]} // Access theme values
+        onPress={handleExportData}>
         <View style={styles.buttonContainer}>
-          <Download color={styles.buttonText.color} />
-          <Text style={styles.buttonText}>Save your data</Text>
+          <Download color={theme.color.get()} /> {/* Use theme.color for icon */}
+          <Text style={[styles.buttonText, { color: theme.color.get() }]}>Save your data</Text>
         </View>
       </TouchableOpacity>
 
       {/* Dark mode toggle */}
       <TouchableOpacity
-        style={styles.button} // Now using the dynamically created button style
+        style={[styles.button, { backgroundColor: theme.primary.get() }]}
         onPress={toggleColorScheme}>
-        <Text style={styles.buttonText}>
+        <Text style={[styles.buttonText, { color: theme.color.get() }]}>
           {colorScheme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
         </Text>
       </TouchableOpacity>
     </View>
   );
 }
+
+// Keep your StyleSheet.create for static styles or those not handled by Tamagui directly
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  button: {
+    padding: 12,
+    borderRadius: 10,
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  buttonText: {
+    fontWeight: '600',
+    fontSize: 16
+  },
+  title: {
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+});

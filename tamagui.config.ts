@@ -1,9 +1,71 @@
 import { createAnimations } from '@tamagui/animations-react-native';
 import { createInterFont } from '@tamagui/font-inter';
 import { shorthands } from '@tamagui/shorthands';
-import { themes, tokens } from '@tamagui/themes';
+import { radius, size, space, zIndex } from '@tamagui/themes';
 
-import { createTamagui, styled, SizableText, H1, YStack, Button as ButtonTamagui } from 'tamagui';
+import { createTamagui, createTokens, Theme, styled, SizableText, H1, YStack, Button as ButtonTamagui } from 'tamagui';
+
+// 1. Define your color tokens (if not using @tamagui/colors directly)
+// This is where you would map your specific hex codes to token names
+const customColors = {
+  // Light mode specific colors
+  lightPrimary: '#007AFF',
+  lightSecondary: '#E5E5EA',
+  lightText: '#000000',
+  lightBackground: '#FFFFFF',
+  lightDarkGray: '#666666', // Example for your darkGray
+
+  // Dark mode specific colors
+  darkPrimary: '#0A84FF',
+  darkSecondary: '#2C2C2E',
+  darkText: '#FFFFFF',
+  darkBackground: '#000000',
+  darkDarkGray: '#999999', // Example for your darkGray
+};
+
+// 2. Create tokens
+// Tamagui tokens are fundamental building blocks. Themes will reference these.
+const tokens = createTokens({
+  size, // Standard sizes from @tamagui/themes
+  space, // Standard spacing from @tamagui/themes
+  zIndex, // Standard zIndex from @tamagui/themes
+  color: {
+    ...customColors, // Spread your custom colors here
+  },
+  radius, // Standard radii from @tamagui/themes
+});
+
+// 3. Define your themes
+// These themes will map semantic keys (like 'background', 'color', 'primary')
+// to the actual color tokens.
+const lightTheme = {
+  background: tokens.color.lightBackground,
+  backgroundHover: tokens.color.lightSecondary, // Example for hover states
+  backgroundPress: tokens.color.lightSecondary,
+  color: tokens.color.lightText,
+  colorHover: tokens.color.lightText,
+  colorPress: tokens.color.lightText,
+  primary: tokens.color.lightPrimary, // Custom key for primary color
+  darkGray: tokens.color.lightDarkGray, // Custom key for dark gray
+  // Add other keys you use in your styles: borderColor, shadowColor, etc.
+};
+
+const darkTheme = {
+  background: tokens.color.darkBackground,
+  backgroundHover: tokens.color.darkSecondary,
+  backgroundPress: tokens.color.darkSecondary,
+  color: tokens.color.darkText,
+  colorHover: tokens.color.darkText,
+  colorPress: tokens.color.darkText,
+  primary: tokens.color.darkPrimary,
+  darkGray: tokens.color.darkDarkGray,
+  // Add other keys you use
+};
+
+const themes = {
+  light: lightTheme,
+  dark: darkTheme,
+};
 
 const animations = createAnimations({
   bouncy: {
