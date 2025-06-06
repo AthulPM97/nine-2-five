@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { TamaguiProvider } from 'tamagui';
 import { SplashScreen, Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
+import * as Notifications from 'expo-notifications';
 
 import config from '../tamagui.config';
 
@@ -17,6 +18,16 @@ export const unstable_settings = {
   initialRouteName: '(tabs)',
 };
 
+// Configure notification handling
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowList: true,
+    shouldShowBanner: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
+
 export default function RootLayout() {
   const [loaded] = useFonts({
     Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
@@ -25,6 +36,11 @@ export default function RootLayout() {
 
   // --- App state and background handling logic START ---
   const { isRunning, isPaused, setBackgroundMode, syncTimerWithRealTime } = useTimerStore();
+
+  useEffect(() => {
+    // Request permissions on mount
+    Notifications.requestPermissionsAsync();
+  }, []);
 
   // Handle app state changes (foreground/background)
   useEffect(() => {
