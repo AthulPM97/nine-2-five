@@ -15,6 +15,8 @@ import {
   getTagStats,
   syncTimerWithRealTimeSelector,
 } from './timerSelectors';
+import * as Notifications from 'expo-notifications';
+import { scheduleSessionCompleteNotification } from '~/utils/notificationUtils';
 
 const useTimerStore = create<TimerState>()(
   persist(
@@ -50,9 +52,13 @@ const useTimerStore = create<TimerState>()(
           isPaused: false,
           lastUpdatedTime: Date.now(),
         });
+
+        const duration = get().timeRemaining;
+        await scheduleSessionCompleteNotification(duration);
       },
 
       pauseTimer: async () => {
+        await Notifications.cancelAllScheduledNotificationsAsync();
         // Unregister background task when timer pauses
         if (Platform.OS !== 'web') {
           await unregisterBackgroundTask();
@@ -75,9 +81,14 @@ const useTimerStore = create<TimerState>()(
           isPaused: false,
           lastUpdatedTime: Date.now(),
         });
+
+        const duration = get().timeRemaining;
+        await scheduleSessionCompleteNotification(duration);
       },
 
       resetTimer: async () => {
+        await Notifications.cancelAllScheduledNotificationsAsync();
+
         // Unregister background task when timer resets
         if (Platform.OS !== 'web') {
           await unregisterBackgroundTask();
@@ -92,6 +103,7 @@ const useTimerStore = create<TimerState>()(
       },
 
       completeSession: async (completed) => {
+        await Notifications.cancelAllScheduledNotificationsAsync();
         await completeSessionSelector(get, set, completed);
       },
 
