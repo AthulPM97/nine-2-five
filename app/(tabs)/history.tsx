@@ -97,7 +97,9 @@ export default function HistoryScreen() {
 
         <View style={styles.summaryCard}>
           <Text style={styles.summaryTitle}>Last 7 days, you spent</Text>
-          <Text style={styles.summaryValue}>{totalHours} hours</Text>
+          <Text style={styles.summaryValue}>
+            {Math.floor(totalSeconds / 3600)} hours {Math.floor((totalSeconds % 3600) / 60)} minutes
+          </Text>
         </View>
       </View>
 

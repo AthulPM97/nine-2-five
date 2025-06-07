@@ -115,7 +115,7 @@ export default function TimerScreen() {
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}>
-      <StatusBar style="dark" />
+      <StatusBar bg="$background" />
 
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>Focus Time</Text>

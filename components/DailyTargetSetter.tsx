@@ -16,7 +16,7 @@ export default function DailyTargetSetter({ onClose }: DailyTargetSetterProps) {
   const initialHours = Math.floor(dailyTarget / 3600);
   const [hours, setHours] = useState(initialHours.toString());
 
-  const MIN_HOURS = 4;
+  const MIN_HOURS = 1;
   const MAX_HOURS = 9;
 
   const triggerHaptic = () => {
