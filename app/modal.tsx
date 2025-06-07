@@ -6,9 +6,14 @@ import useTimerStore from '~/store/timerStore';
 import Colors from '~/constants/colors';
 import { View } from 'tamagui';
 import { Download } from 'lucide-react-native';
+import useColorSchemeStore from '~/store/colorSchemeStore';
+import { useTheme } from 'tamagui'; // Import useTheme from Tamagui
 
 export default function Modal() {
   const { exportData } = useTimerStore();
+
+  const { colorScheme, toggleColorScheme } = useColorSchemeStore();
+  const theme = useTheme(); // Get the current Tamagui theme object
   // Download/export handler
   const handleExportData = async () => {
     try {
@@ -44,13 +49,18 @@ export default function Modal() {
     }
   };
   return (
-    <View style={styles.container}>
+    <View bg="$background" style={styles.container}>
       {/* <Text style={styles.title}>Download your data</Text> */}
       <TouchableOpacity style={styles.button} onPress={handleExportData}>
         <View style={styles.buttonContainer}>
           <Download />
           <Text style={styles.buttonText}>Save your data</Text>
         </View>
+      </TouchableOpacity>
+
+      {/* Dark mode toggle */}
+      <TouchableOpacity style={styles.button} onPress={toggleColorScheme}>
+        <Text>{colorScheme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -59,7 +69,6 @@ export default function Modal() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.background,
     padding: 20,
   },
   button: {

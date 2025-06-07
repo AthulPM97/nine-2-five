@@ -5,6 +5,7 @@ import { useFonts } from 'expo-font';
 import * as Notifications from 'expo-notifications';
 
 import config from '../tamagui.config';
+import useColorSchemeStore from '~/store/colorSchemeStore';
 
 // --- Add these imports for app state/background handling ---
 import { AppState, Platform } from 'react-native';
@@ -33,6 +34,8 @@ export default function RootLayout() {
     Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
     InterBold: require('@tamagui/font-inter/otf/Inter-Bold.otf'),
   });
+
+  const { colorScheme, toggleColorScheme } = useColorSchemeStore();
 
   // --- App state and background handling logic START ---
   const { isRunning, isPaused, setBackgroundMode, syncTimerWithRealTime } = useTimerStore();
@@ -87,10 +90,10 @@ export default function RootLayout() {
   if (!loaded) return null;
 
   return (
-    <TamaguiProvider config={config}>
+    <TamaguiProvider config={config} defaultTheme={colorScheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Settings' }} />
+        <Stack.Screen name="modal" options={{ title: 'Settings' }} />
       </Stack>
     </TamaguiProvider>
   );
