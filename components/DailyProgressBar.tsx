@@ -1,5 +1,4 @@
-import { View, Text, StyleSheet } from 'react-native';
-import Colors from '~/constants/colors';
+import { YStack, XStack, Text, View } from 'tamagui';
 
 interface DailyProgressBarProps {
   currentSeconds: number;
@@ -27,61 +26,27 @@ export default function DailyProgressBar({ currentSeconds, targetSeconds }: Dail
   const formatProgress = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    return `${hours}h ${minutes > 0 ? `${minutes}m` : ''}`;
+    return `${hours}h${minutes > 0 ? ` ${minutes}m` : ''}`;
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.labelContainer}>
-        <Text style={styles.progressLabel}>
+    <YStack my="$2">
+      <XStack jc="space-between" mb="$2">
+        <Text fontSize={14} color="$color" fontWeight="500">
           {formatProgress(currentSeconds)} of {formatProgress(targetSeconds)}
         </Text>
-        <Text style={styles.remainingLabel}>{formatTimeRemaining(currentSeconds)}</Text>
-      </View>
-
-      <View style={styles.progressBarContainer}>
+        <Text fontSize={14} color="$gray10">
+          {formatTimeRemaining(currentSeconds)}
+        </Text>
+      </XStack>
+      <View height={10} bg="$gray4" borderRadius={5} overflow="hidden">
         <View
-          style={[
-            styles.progressBar,
-            { width: `${progressPercentage}%` },
-            progressPercentage >= 100 ? styles.completedBar : null,
-          ]}
+          height="100%"
+          width={`${progressPercentage}%`}
+          bg={progressPercentage >= 100 ? '$green10' : '$blue10'}
+          borderRadius={5}
         />
       </View>
-    </View>
+    </YStack>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: 8,
-  },
-  labelContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
-  progressLabel: {
-    fontSize: 14,
-    color: Colors.light.text,
-    fontWeight: '500',
-  },
-  remainingLabel: {
-    fontSize: 14,
-    color: Colors.light.darkGray,
-  },
-  progressBarContainer: {
-    height: 10,
-    backgroundColor: Colors.light.lightGray,
-    borderRadius: 5,
-    overflow: 'hidden',
-  },
-  progressBar: {
-    height: '100%',
-    backgroundColor: Colors.light.primary,
-    borderRadius: 5,
-  },
-  completedBar: {
-    backgroundColor: Colors.light.success,
-  },
-});

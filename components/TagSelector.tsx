@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList } from 'react-native';
-import Colors from '~/constants/colors';
+import { Platform } from 'react-native';
+import { YStack, XStack, Text, Input, Button, useTheme, ScrollView } from 'tamagui';
 import { Tag, Plus, X } from 'lucide-react-native';
 import useTimerStore from '~/store/timerStore';
 import * as Haptics from 'expo-haptics';
-import { Platform } from 'react-native';
 
 interface TagSelectorProps {
   onTagSelected: () => void;
@@ -14,6 +13,7 @@ interface TagSelectorProps {
 export default function TagSelector({ onTagSelected, onCancel }: TagSelectorProps) {
   const { setCurrentTag, recentTags } = useTimerStore();
   const [newTag, setNewTag] = useState('');
+  const theme = useTheme();
 
   const triggerHaptic = () => {
     if (Platform.OS !== 'web') {
@@ -36,146 +36,87 @@ export default function TagSelector({ onTagSelected, onCancel }: TagSelectorProp
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>What are you studying?</Text>
-        <Text style={styles.subtitle}>Add a tag to track your study subjects</Text>
-      </View>
+    <YStack bg="$background" p="$5" borderRadius={16} gap="$2" width="100%">
+      {/* Header */}
+      <YStack ai="center" mb="$3">
+        <Text fontSize={20} fontWeight="600" color="$color" mb="$2">
+          What are you studying?
+        </Text>
+        <Text fontSize={16} color="$gray10" textAlign="center">
+          Add a tag to track your study subjects
+        </Text>
+      </YStack>
 
-      <View style={styles.inputContainer}>
-        <Tag size={20} color={Colors.light.darkGray} />
-        <TextInput
-          style={styles.input}
+      {/* Input */}
+      <XStack ai="center" bg="$gray4" borderRadius={12} px="$4" py="$3" mb="$3" gap="$1">
+        <Tag size={20} color={theme.gray10?.val ?? '#888'} />
+        <Input
+          flex={1}
+          fontSize={16}
+          color="$color"
           placeholder="Enter subject (e.g., Math, Physics)"
           value={newTag}
           onChangeText={setNewTag}
           autoCapitalize="words"
           returnKeyType="done"
           onSubmitEditing={handleAddNewTag}
+          borderWidth={0}
+          bg="transparent"
         />
-      </View>
+      </XStack>
 
-      <TouchableOpacity
-        style={styles.addButton}
+      {/* Add Button */}
+      <Button
+        bg="$blue10"
+        color="$background"
+        borderRadius={12}
+        gap="$2"
+        mb="$2"
         onPress={handleAddNewTag}
-        disabled={!newTag.trim()}>
-        <Plus size={20} color="#FFF" />
-        <Text style={styles.addButtonText}>Add & Start</Text>
-      </TouchableOpacity>
+        disabled={!newTag.trim()}
+        icon={<Plus size={20} color={theme.background?.val ?? '#FFF'} />}>
+        <Text color="$background" fontSize={16} fontWeight="600">
+          Add & Start
+        </Text>
+      </Button>
 
+      {/* Recent Tags */}
       {recentTags.length > 0 && (
-        <View style={styles.recentContainer}>
-          <Text style={styles.recentTitle}>Recent Subjects</Text>
-          <FlatList
-            data={recentTags}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item}
-            renderItem={({ item }) => (
-              <TouchableOpacity style={styles.tagButton} onPress={() => handleSelectTag(item)}>
-                <Tag size={16} color={Colors.light.primary} />
-                <Text style={styles.tagText}>{item}</Text>
-              </TouchableOpacity>
-            )}
-            contentContainerStyle={styles.tagsList}
-          />
-        </View>
+        <YStack mb="$4">
+          <Text fontSize={16} fontWeight="600" color="$gray10" mb="$3">
+            Recent Subjects
+          </Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <XStack gap="$2">
+              {recentTags.map((item) => (
+                <Button
+                  key={item}
+                  bg="$gray4"
+                  borderRadius={20}
+                  px="$4"
+                  py="$2"
+                  ai="center"
+                  gap="$2"
+                  onPress={() => handleSelectTag(item)}
+                  icon={<Tag size={16} color={theme.blue10?.val ?? '#007aff'} />}
+                  chromeless>
+                  <Text fontSize={14} color="$color" fontWeight="500">
+                    {item}
+                  </Text>
+                </Button>
+              ))}
+            </XStack>
+          </ScrollView>
+        </YStack>
       )}
 
-      <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
-        <X size={20} color={Colors.light.darkGray} />
-        <Text style={styles.cancelText}>Cancel</Text>
-      </TouchableOpacity>
-    </View>
+      {/* Cancel Button */}
+      <Button chromeless ai="center" jc="center" gap="$2" onPress={onCancel}>
+        <X size={20} color={theme.gray10?.val ?? '#888'} />
+        <Text fontSize={16} color="$gray10" fontWeight="500">
+          Cancel
+        </Text>
+      </Button>
+    </YStack>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: Colors.light.background,
-    padding: 24,
-    borderRadius: 16,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: Colors.light.text,
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: Colors.light.darkGray,
-    textAlign: 'center',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.light.lightGray,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginBottom: 16,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    marginLeft: 12,
-    color: Colors.light.text,
-  },
-  addButton: {
-    flexDirection: 'row',
-    backgroundColor: Colors.light.primary,
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-    gap: 8,
-  },
-  addButtonText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  recentContainer: {
-    marginBottom: 24,
-  },
-  recentTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.light.darkGray,
-    marginBottom: 12,
-  },
-  tagsList: {
-    gap: 8,
-  },
-  tagButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.light.lightGray,
-    borderRadius: 20,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    gap: 6,
-  },
-  tagText: {
-    fontSize: 14,
-    color: Colors.light.text,
-    fontWeight: '500',
-  },
-  cancelButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  cancelText: {
-    fontSize: 16,
-    color: Colors.light.darkGray,
-    fontWeight: '500',
-  },
-});

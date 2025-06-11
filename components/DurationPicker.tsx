@@ -1,7 +1,6 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import Colors from '~/constants/colors';
 import { Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import { YStack, XStack, Button, Text } from 'tamagui';
 
 interface DurationPickerProps {
   onSelectDuration: (duration: number) => void;
@@ -9,11 +8,12 @@ interface DurationPickerProps {
 }
 
 const DURATIONS = [
+  { label: '1m', value: 1 * 60 },
   { label: '25m', value: 25 * 60 },
   { label: '45m', value: 45 * 60 },
   { label: '60m', value: 60 * 60 },
   { label: '90m', value: 90 * 60 },
-  { label: '120m', value: 120 * 60 },
+  // { label: '120m', value: 120 * 60 },
 ];
 
 export default function DurationPicker({
@@ -27,68 +27,37 @@ export default function DurationPicker({
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Session Duration</Text>
-      <View style={styles.buttonsContainer}>
-        {DURATIONS.map((duration) => (
-          <TouchableOpacity
-            key={duration.value}
-            style={[
-              styles.durationButton,
-              selectedDuration === duration.value && styles.selectedButton,
-            ]}
-            onPress={() => {
-              triggerHaptic();
-              onSelectDuration(duration.value);
-            }}>
-            <Text
-              style={[
-                styles.durationText,
-                selectedDuration === duration.value && styles.selectedText,
-              ]}>
-              {duration.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
+    <YStack mb="$6" ai="center">
+      <Text fontSize={16} fontWeight="600" color="$color" mb="$3" textAlign="center">
+        Session Duration
+      </Text>
+      <XStack gap="$2" flexWrap="wrap" jc="center">
+        {DURATIONS.map((duration) => {
+          const isSelected = selectedDuration === duration.value;
+          return (
+            <Button
+              key={duration.value}
+              bg={isSelected ? '$blue10' : '$gray4'}
+              color={isSelected ? '$background' : '$color'}
+              borderRadius={20}
+              minWidth={60}
+              px="$2"
+              py="$2"
+              fontWeight="500"
+              onPress={() => {
+                triggerHaptic();
+                onSelectDuration(duration.value);
+              }}
+              pressStyle={{
+                bg: isSelected ? '$blue9' : '$gray4',
+              }}>
+              <Text fontSize={16} color={isSelected ? '$background' : '$color'} fontWeight="500">
+                {duration.label}
+              </Text>
+            </Button>
+          );
+        })}
+      </XStack>
+    </YStack>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 30,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.light.darkGray,
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  buttonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  durationButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    backgroundColor: Colors.light.lightGray,
-    minWidth: 60,
-    alignItems: 'center',
-  },
-  selectedButton: {
-    backgroundColor: Colors.light.primary,
-  },
-  durationText: {
-    fontSize: 16,
-    color: Colors.light.text,
-    fontWeight: '500',
-  },
-  selectedText: {
-    color: '#FFF',
-  },
-});
