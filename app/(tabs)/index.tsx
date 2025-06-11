@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
 import Colors from '~/constants/colors';
 import TimerDisplay from '~/components/TimerDisplay';
 import TimerControls from '~/components/TimerControls';
@@ -13,6 +12,7 @@ import { Platform, AppState } from 'react-native';
 import { getTodayDateString } from '~/utils/dateUtils';
 import { Target, Tag, Bell } from 'lucide-react-native';
 import TagSelectorModal from '~/components/TagSelectorModal';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function TimerScreen() {
   const {
@@ -111,82 +111,82 @@ export default function TimerScreen() {
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-      showsVerticalScrollIndicator={false}>
-      <StatusBar bg="$background" />
-
-      <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>Focus Time</Text>
-        <Text style={styles.headerSubtitle}>Stay productive and focused</Text>
-      </View>
-
-      {/* Daily Target Progress */}
-      <View style={styles.targetContainer}>
-        <View style={styles.targetHeader}>
-          <Text style={styles.targetTitle}>Daily Target</Text>
-          <TouchableOpacity style={styles.targetButton} onPress={() => setShowTargetModal(true)}>
-            <Target size={16} color={Colors.light.primary} />
-            <Text style={styles.targetButtonText}>Set Target</Text>
-          </TouchableOpacity>
+    <SafeAreaView style={styles.container}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}>
+        <View style={styles.headerContainer}>
+          <Text style={styles.headerTitle}>Focus Time</Text>
+          <Text style={styles.headerSubtitle}>Stay productive and focused</Text>
         </View>
-        <DailyProgressBar currentSeconds={todaySeconds} targetSeconds={dailyTarget} />
-      </View>
 
-      {!isRunning && !isPaused && (
-        <DurationPicker onSelectDuration={handleDurationChange} selectedDuration={duration} />
-      )}
-
-      {/* Current subject tag display */}
-      {currentTag && (isRunning || isPaused) && (
-        <View style={styles.currentTagContainer}>
-          <Tag size={16} color={Colors.light.primary} />
-          <Text style={styles.currentTagText}>Studying: {currentTag}</Text>
+        {/* Daily Target Progress */}
+        <View style={styles.targetContainer}>
+          <View style={styles.targetHeader}>
+            <Text style={styles.targetTitle}>Daily Target</Text>
+            <TouchableOpacity style={styles.targetButton} onPress={() => setShowTargetModal(true)}>
+              <Target size={16} color={Colors.light.primary} />
+              <Text style={styles.targetButtonText}>Set Target</Text>
+            </TouchableOpacity>
+          </View>
+          <DailyProgressBar currentSeconds={todaySeconds} targetSeconds={dailyTarget} />
         </View>
-      )}
 
-      {/* Background mode indicator */}
-      {isBackgroundMode && (
-        <View style={styles.backgroundModeContainer}>
-          <Bell size={16} color={Colors.light.primary} />
-          <Text style={styles.backgroundModeText}>Timer running in background</Text>
+        {!isRunning && !isPaused && (
+          <DurationPicker onSelectDuration={handleDurationChange} selectedDuration={duration} />
+        )}
+
+        {/* Current subject tag display */}
+        {currentTag && (isRunning || isPaused) && (
+          <View style={styles.currentTagContainer}>
+            <Tag size={16} color={Colors.light.primary} />
+            <Text style={styles.currentTagText}>Studying: {currentTag}</Text>
+          </View>
+        )}
+
+        {/* Background mode indicator */}
+        {isBackgroundMode && (
+          <View style={styles.backgroundModeContainer}>
+            <Bell size={16} color={Colors.light.primary} />
+            <Text style={styles.backgroundModeText}>Timer running in background</Text>
+          </View>
+        )}
+
+        <View style={styles.timerContainer}>
+          <TimerDisplay
+            timeRemaining={timeRemaining}
+            duration={duration}
+            isBackgroundMode={isBackgroundMode}
+          />
         </View>
-      )}
 
-      <View style={styles.timerContainer}>
-        <TimerDisplay
-          timeRemaining={timeRemaining}
-          duration={duration}
+        <TimerControls
+          isRunning={isRunning}
+          isPaused={isPaused}
           isBackgroundMode={isBackgroundMode}
+          onStart={handleStartTimer}
+          onPause={pauseTimer}
+          onResume={resumeTimer}
+          onReset={resetTimer}
+          onStop={handleStop}
         />
-      </View>
 
-      <TimerControls
-        isRunning={isRunning}
-        isPaused={isPaused}
-        isBackgroundMode={isBackgroundMode}
-        onStart={handleStartTimer}
-        onPause={pauseTimer}
-        onResume={resumeTimer}
-        onReset={resetTimer}
-        onStop={handleStop}
-      />
+        <SessionCompleteModal
+          visible={showCompletionModal}
+          onClose={() => setShowCompletionModal(false)}
+          duration={duration}
+        />
 
-      <SessionCompleteModal
-        visible={showCompletionModal}
-        onClose={() => setShowCompletionModal(false)}
-        duration={duration}
-      />
+        <DailyTargetModal visible={showTargetModal} onClose={() => setShowTargetModal(false)} />
 
-      <DailyTargetModal visible={showTargetModal} onClose={() => setShowTargetModal(false)} />
-
-      <TagSelectorModal
-        visible={showTagModal}
-        onClose={() => setShowTagModal(false)}
-        onTagSelected={handleTagSelected}
-      />
-    </ScrollView>
+        <TagSelectorModal
+          visible={showTagModal}
+          onClose={() => setShowTagModal(false)}
+          onTagSelected={handleTagSelected}
+        />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

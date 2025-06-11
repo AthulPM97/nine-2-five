@@ -10,7 +10,7 @@ Expo Modules (like expo-notifications, expo-modules-core, etc.) must use compati
 npx expo install <package>
 ```
 
-Production build (standalone apk)
+Production build (builds an aab file for play store)
 
 ```
 eas build --platform android --profile production
@@ -18,3 +18,13 @@ eas build --platform android --profile production
 
 build only takes the committed changes, not the local uncommited changes.
 So always commit before building.
+
+Build preview (builds an apk)
+```
+eas build --platform android --profile preview
+```
+
+Expo doctor
+```
+npx expo-doctor
+```

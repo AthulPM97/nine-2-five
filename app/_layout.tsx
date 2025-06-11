@@ -93,7 +93,7 @@ export default function RootLayout() {
     <TamaguiProvider config={config} defaultTheme={colorScheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ title: 'Settings' }} />
+        <Stack.Screen name="modal" options={{ headerShown: false, title: 'Settings' }} />
       </Stack>
     </TamaguiProvider>
   );

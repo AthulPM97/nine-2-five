@@ -26,6 +26,7 @@ export default function TabLayout() {
         options={{
           title: 'Study Timer',
           tabBarIcon: ({ color }) => <Clock size={24} color={color} />,
+          headerShown: false,
         }}
       />
       <Tabs.Screen
