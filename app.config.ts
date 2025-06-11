@@ -1,7 +1,7 @@
 export default {
   expo: {
     name: '9to5',
-    slug: '9to5-dev',
+    slug: 'nine-2-five',
     version: '1.0.0',
     scheme: '9to5',
     web: {
