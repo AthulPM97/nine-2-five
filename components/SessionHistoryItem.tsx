@@ -1,6 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { YStack, XStack, Text, useTheme } from 'tamagui';
 import { StudySession } from '~/types/timer';
-import Colors from '~/constants/colors';
 import { CheckCircle, XCircle, Clock, Tag } from 'lucide-react-native';
 
 interface SessionHistoryItemProps {
@@ -9,6 +8,8 @@ interface SessionHistoryItemProps {
 }
 
 export default function SessionHistoryItem({ session, isToday = false }: SessionHistoryItemProps) {
+  const theme = useTheme();
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -38,111 +39,54 @@ export default function SessionHistoryItem({ session, isToday = false }: Session
   };
 
   return (
-    <View style={[styles.container, isToday && styles.todayContainer]}>
-      <View style={styles.iconContainer}>
+    <XStack
+      p="$4"
+      bg="$gray3"
+      borderRadius={12}
+      mb="$3"
+      ai="center"
+      borderLeftWidth={isToday ? 3 : 0}
+      borderLeftColor="$blue10">
+      <XStack mr="$3">
         {session.completed ? (
-          <CheckCircle color={Colors.light.success} size={24} />
+          <CheckCircle color={theme.green10.val} size={24} />
         ) : (
-          <XCircle color={Colors.light.error} size={24} />
+          <XCircle color={theme.red10.val} size={24} />
         )}
-      </View>
-      <View style={styles.contentContainer}>
-        <Text style={styles.dateText}>{isToday ? 'Today' : formatDate(session.date)}</Text>
-        <View style={styles.detailsRow}>
-          <View style={styles.timeContainer}>
-            <Clock size={14} color={Colors.light.darkGray} />
-            <Text style={styles.timeText}>{formatTime(session.date)}</Text>
-          </View>
-          <Text style={styles.durationText}>{formatDuration(session.duration)}</Text>
-        </View>
+      </XStack>
+
+      <YStack f={1}>
+        <Text color="$color" fontSize={16} fontWeight="600" mb="$1">
+          {isToday ? 'Today' : formatDate(session.date)}
+        </Text>
+
+        <XStack ai="center" mb="$1">
+          <XStack ai="center" mr="$3">
+            <Clock size={14} color={theme.gray10.val} />
+            <Text color="$gray10" fontSize={14} ml="$1">
+              {formatTime(session.date)}
+            </Text>
+          </XStack>
+          <Text color="$gray10" fontSize={14} fontWeight="500">
+            {formatDuration(session.duration)}
+          </Text>
+        </XStack>
+
         {session.tag && (
-          <View style={styles.tagContainer}>
-            <Tag size={14} color={Colors.light.primary} />
-            <Text style={styles.tagText}>{session.tag}</Text>
-          </View>
+          <XStack ai="center">
+            <Tag size={14} color={theme.blue10.val} />
+            <Text color="$blue10" fontSize={14} fontWeight="500" ml="$1">
+              {session.tag}
+            </Text>
+          </XStack>
         )}
-      </View>
-      <View style={styles.statusContainer}>
-        <Text
-          style={[
-            styles.statusText,
-            session.completed ? styles.completedText : styles.incompleteText,
-          ]}>
+      </YStack>
+
+      <XStack px="$2.5" py="$1" borderRadius={12}>
+        <Text fontSize={14} fontWeight="600" color={session.completed ? '$green10' : '$red10'}>
           {session.completed ? 'Completed' : 'Stopped'}
         </Text>
-      </View>
-    </View>
+      </XStack>
+    </XStack>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    padding: 16,
-    backgroundColor: Colors.light.lightGray,
-    borderRadius: 12,
-    marginBottom: 12,
-    alignItems: 'center',
-  },
-  todayContainer: {
-    borderLeftWidth: 3,
-    borderLeftColor: Colors.light.primary,
-  },
-  iconContainer: {
-    marginRight: 12,
-  },
-  contentContainer: {
-    flex: 1,
-  },
-  dateText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.light.text,
-    marginBottom: 4,
-  },
-  detailsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  timeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  timeText: {
-    fontSize: 14,
-    color: Colors.light.darkGray,
-    marginLeft: 4,
-  },
-  durationText: {
-    fontSize: 14,
-    color: Colors.light.darkGray,
-    fontWeight: '500',
-  },
-  tagContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  tagText: {
-    fontSize: 14,
-    color: Colors.light.primary,
-    fontWeight: '500',
-    marginLeft: 4,
-  },
-  statusContainer: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  completedText: {
-    color: Colors.light.success,
-  },
-  incompleteText: {
-    color: Colors.light.error,
-  },
-});

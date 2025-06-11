@@ -1,105 +1,126 @@
 import { useState } from 'react';
-import { View, StyleSheet, FlatList, Text, TouchableOpacity } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import Colors from '~/constants/colors';
-import SessionHistoryItem from '~/components/SessionHistoryItem';
-import useTimerStore from '~/store/timerStore';
+import { FlatList } from 'react-native';
+
 import { Clock, Tag, BarChart } from 'lucide-react-native';
+import { YStack, XStack, Text, Button, useTheme } from 'tamagui';
+
+import SessionHistoryItem from '~/components/SessionHistoryItem';
+import TagStatsChart from '~/components/TagStatsChart';
+
 import { getTodayDateString, isToday } from '~/utils/dateUtils';
 import { getLast7DaysTotalSeconds } from '~/utils/historyUtils';
-import TagStatsChart from '~/components/TagStatsChart';
 import { formatTotalTime } from '~/utils/formatTime';
+import useTimerStore from '~/store/timerStore';
 
 export default function HistoryScreen() {
   const { sessions, dailyProgress, getTagStats } = useTimerStore();
   const [activeTab, setActiveTab] = useState<'sessions' | 'subjects'>('sessions');
+  const theme = useTheme();
 
   const totalSeconds = getLast7DaysTotalSeconds(dailyProgress);
-
-  // Sort sessions by date (newest first)
   const sortedSessions = [...sessions].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
-
-  // Get tag statistics
   const tagStats = getTagStats();
-
-  // Calculate total study time for today only
   const today = getTodayDateString();
   const todaySessions = sessions.filter((session) => session.date.split('T')[0] === today);
   const totalStudyTime = todaySessions.reduce((total, session) => total + session.duration, 0);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <Text style={styles.statTitle}>Total Study Time Today</Text>
-          <View style={styles.statValueContainer}>
-            <Clock size={20} color={Colors.light.primary} />
-            <Text style={styles.statValue}>{formatTotalTime(totalStudyTime)}</Text>
-          </View>
-        </View>
+    <YStack f={1} bg="$background" p="$4">
+      <YStack mb="$6">
+        {/* Total Study Time Card */}
+        <YStack bg="$gray4" br={16} p="$4" mb="$3">
+          <Text color="$gray10" fontSize={14} mb="$2">
+            Total Study Time Today
+          </Text>
+          <XStack ai="center" gap="$2">
+            <Clock size={20} color={theme.blue10.val} />
+            <Text color="$color" fontSize={20} fontWeight="600">
+              {formatTotalTime(totalStudyTime)}
+            </Text>
+          </XStack>
+        </YStack>
 
-        <View style={styles.statRow}>
-          <View style={[styles.statCard, styles.smallStatCard]}>
-            <Text style={styles.statTitle}>Sessions Today</Text>
-            <Text style={styles.statValue}>{todaySessions.length}</Text>
-          </View>
+        {/* Stats Row */}
+        <XStack gap="$3" mb="$3">
+          <YStack f={1} bg="$gray4" br={16} p="$4">
+            <Text color="$gray10" fontSize={14} mb="$2">
+              Sessions Today
+            </Text>
+            <Text color="$color" fontSize={20} fontWeight="600">
+              {todaySessions.length}
+            </Text>
+          </YStack>
 
-          <View style={[styles.statCard, styles.smallStatCard]}>
-            <Text style={styles.statTitle}>Total Subjects</Text>
-            <Text style={[styles.statValue, { color: Colors.light.primary }]}>
+          <YStack f={1} bg="$gray4" br={16} p="$4">
+            <Text color="$gray10" fontSize={14} mb="$2">
+              Total Subjects
+            </Text>
+            <Text color="$blue10" fontSize={20} fontWeight="600">
               {tagStats.length}
             </Text>
-          </View>
-        </View>
+          </YStack>
+        </XStack>
 
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryTitle}>Last 7 days, you spent</Text>
-          <Text style={styles.summaryValue}>
+        {/* Summary Card */}
+        <YStack bg="$gray4" br={16} p="$4" ai="center">
+          <Text color="$gray10" fontSize={14} fontWeight="500" mb="$1">
+            Last 7 days, you spent
+          </Text>
+          <Text color="$color" fontSize={24} fontWeight="bold">
             {Math.floor(totalSeconds / 3600)} hours {Math.floor((totalSeconds % 3600) / 60)} minutes
           </Text>
-        </View>
-      </View>
+        </YStack>
+      </YStack>
 
-      {/* Tab selector */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tabButton, activeTab === 'sessions' && styles.activeTabButton]}
-          onPress={() => setActiveTab('sessions')}>
-          <Clock
-            size={18}
-            color={activeTab === 'sessions' ? Colors.light.primary : Colors.light.darkGray}
-          />
-          <Text style={[styles.tabText, activeTab === 'sessions' && styles.activeTabText]}>
+      {/* Tab Selector */}
+      <XStack bg="$gray4" br={12} mb="$5" p="$1">
+        <Button
+          f={1}
+          bg={activeTab === 'sessions' ? '$gray6' : 'transparent'}
+          br={8}
+          onPress={() => setActiveTab('sessions')}
+          icon={
+            <Clock
+              size={18}
+              color={activeTab === 'sessions' ? theme.blue10.val : theme.gray10.val}
+            />
+          }>
+          <Text color={activeTab === 'sessions' ? '$color' : '$gray10'} fontWeight="500">
             Sessions
           </Text>
-        </TouchableOpacity>
+        </Button>
 
-        <TouchableOpacity
-          style={[styles.tabButton, activeTab === 'subjects' && styles.activeTabButton]}
-          onPress={() => setActiveTab('subjects')}>
-          <Tag
-            size={18}
-            color={activeTab === 'subjects' ? Colors.light.primary : Colors.light.darkGray}
-          />
-          <Text style={[styles.tabText, activeTab === 'subjects' && styles.activeTabText]}>
+        <Button
+          f={1}
+          bg={activeTab === 'subjects' ? '$gray6' : 'transparent'}
+          br={8}
+          onPress={() => setActiveTab('subjects')}
+          icon={
+            <Tag size={18} color={activeTab === 'subjects' ? theme.blue10.val : theme.gray10.val} />
+          }>
+          <Text color={activeTab === 'subjects' ? '$color' : '$gray10'} fontWeight="500">
             Subjects
           </Text>
-        </TouchableOpacity>
-      </View>
+        </Button>
+      </XStack>
 
       {activeTab === 'sessions' ? (
-        <View style={styles.historyContainer}>
-          <Text style={styles.sectionTitle}>Session History</Text>
+        <YStack f={1}>
+          <Text color="$color" fontSize={18} fontWeight="600" mb="$4">
+            Session History
+          </Text>
 
           {sortedSessions.length === 0 ? (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No study sessions yet</Text>
-              <Text style={styles.emptySubtext}>
+            <YStack f={1} jc="center" ai="center" mt="$6">
+              <Text color="$gray10" fontSize={18} fontWeight="600" mb="$2">
+                No study sessions yet
+              </Text>
+              <Text color="$gray10" fontSize={14} ta="center">
                 Complete your first study session to see it here
               </Text>
-            </View>
+            </YStack>
           ) : (
             <FlatList
               data={sortedSessions}
@@ -108,174 +129,22 @@ export default function HistoryScreen() {
                 <SessionHistoryItem session={item} isToday={isToday(item.date.split('T')[0])} />
               )}
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.listContent}
+              contentContainerStyle={{ paddingBottom: 20 }}
             />
           )}
-        </View>
+        </YStack>
       ) : (
-        <View style={styles.historyContainer}>
-          <View style={styles.subjectHeaderContainer}>
-            <Text style={styles.sectionTitle}>Subject Breakdown</Text>
-            <BarChart size={20} color={Colors.light.darkGray} />
-          </View>
+        <YStack f={1}>
+          <XStack jc="space-between" ai="center" mb="$4">
+            <Text color="$color" fontSize={18} fontWeight="600">
+              Subject Breakdown
+            </Text>
+            <BarChart size={20} color={theme.gray10.val} />
+          </XStack>
 
           <TagStatsChart tagStats={tagStats} />
-        </View>
+        </YStack>
       )}
-
-      {/* <DailyTargetModal visible={showTargetModal} onClose={() => setShowTargetModal(false)} /> */}
-    </View>
+    </YStack>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.light.background,
-    padding: 20,
-  },
-  todayContainer: {
-    backgroundColor: Colors.light.lightGray,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 24,
-  },
-  todayHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  todayTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  todayTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.light.text,
-  },
-  targetButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  targetButtonText: {
-    fontSize: 14,
-    color: Colors.light.primary,
-    fontWeight: '500',
-  },
-  statsContainer: {
-    marginBottom: 24,
-  },
-  statCard: {
-    backgroundColor: Colors.light.lightGray,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-  },
-  statRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  smallStatCard: {
-    flex: 1,
-  },
-  statTitle: {
-    fontSize: 14,
-    color: Colors.light.darkGray,
-    marginBottom: 8,
-  },
-  statValueContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: Colors.light.text,
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    backgroundColor: Colors.light.lightGray,
-    borderRadius: 12,
-    marginBottom: 20,
-    padding: 4,
-  },
-  tabButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    gap: 8,
-    borderRadius: 8,
-  },
-  activeTabButton: {
-    backgroundColor: Colors.light.background,
-  },
-  tabText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: Colors.light.darkGray,
-  },
-  activeTabText: {
-    color: Colors.light.text,
-  },
-  historyContainer: {
-    flex: 1,
-  },
-  subjectHeaderContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 16,
-    color: Colors.light.text,
-  },
-  listContent: {
-    paddingBottom: 20,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 60,
-  },
-  emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.light.darkGray,
-    marginBottom: 8,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    color: Colors.light.darkGray,
-    textAlign: 'center',
-  },
-  summaryCard: {
-    backgroundColor: Colors.light.lightGray,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    alignItems: 'center',
-  },
-  summaryTitle: {
-    fontSize: 14,
-    color: Colors.light.darkGray,
-    marginBottom: 4,
-    fontWeight: '500',
-  },
-  summaryValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: Colors.light.text,
-  },
-});

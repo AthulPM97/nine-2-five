@@ -42,6 +42,7 @@ export default function TabLayout() {
         name="history"
         options={{
           title: 'History',
+          headerTintColor: theme.color?.val,
           tabBarIcon: ({ color }) => <BarChart size={24} color={color} />,
           headerRight: () => (
             <Link href="/modal" asChild>
