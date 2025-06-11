@@ -9,16 +9,12 @@ import { getTodayDateString, isToday } from '~/utils/dateUtils';
 import { getLast7DaysTotalSeconds } from '~/utils/historyUtils';
 import TagStatsChart from '~/components/TagStatsChart';
 import { formatTotalTime } from '~/utils/formatTime';
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
-import { Platform, Alert } from 'react-native';
 
 export default function HistoryScreen() {
-  const { sessions, dailyProgress, getTagStats, exportData } = useTimerStore();
+  const { sessions, dailyProgress, getTagStats } = useTimerStore();
   const [activeTab, setActiveTab] = useState<'sessions' | 'subjects'>('sessions');
 
   const totalSeconds = getLast7DaysTotalSeconds(dailyProgress);
-  const totalHours = (totalSeconds / 3600).toFixed(2);
 
   // Sort sessions by date (newest first)
   const sortedSessions = [...sessions].sort(
@@ -33,45 +29,8 @@ export default function HistoryScreen() {
   const todaySessions = sessions.filter((session) => session.date.split('T')[0] === today);
   const totalStudyTime = todaySessions.reduce((total, session) => total + session.duration, 0);
 
-  // Download/export handler
-  const handleExportData = async () => {
-    try {
-      const json = await exportData();
-      const fileName = `study-timer-export-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
-      const fileUri = FileSystem.cacheDirectory + fileName;
-
-      await FileSystem.writeAsStringAsync(fileUri, json, {
-        encoding: FileSystem.EncodingType.UTF8,
-      });
-
-      if (Platform.OS === 'android' || Platform.OS === 'ios') {
-        if (await Sharing.isAvailableAsync()) {
-          await Sharing.shareAsync(fileUri, {
-            mimeType: 'application/json',
-            dialogTitle: 'Export Study Data',
-          });
-        } else {
-          Alert.alert('Sharing not available', 'Cannot share file on this device.');
-        }
-      } else {
-        // Web fallback: download as blob
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        a.click();
-        URL.revokeObjectURL(url);
-      }
-    } catch (err) {
-      Alert.alert('Export failed', 'Could not export data: ' + (err as Error).message);
-    }
-  };
-
   return (
     <View style={styles.container}>
-      <StatusBar style="dark" />
-
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
           <Text style={styles.statTitle}>Total Study Time Today</Text>

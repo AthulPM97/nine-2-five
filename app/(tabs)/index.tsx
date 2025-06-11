@@ -13,6 +13,9 @@ import { getTodayDateString } from '~/utils/dateUtils';
 import { Target, Tag, Bell } from 'lucide-react-native';
 import TagSelectorModal from '~/components/TagSelectorModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'react-native';
+import { useTheme } from 'tamagui';
+import useColorSchemeStore from '~/store/colorSchemeStore';
 
 export default function TimerScreen() {
   const {
@@ -32,6 +35,9 @@ export default function TimerScreen() {
     completeSession,
     syncTimerWithRealTime,
   } = useTimerStore();
+
+  const theme = useTheme();
+  const { colorScheme, setColorScheme } = useColorSchemeStore();
 
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [showTargetModal, setShowTargetModal] = useState(false);
@@ -112,6 +118,10 @@ export default function TimerScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar
+        barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={theme.background.val}
+      />
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.contentContainer}

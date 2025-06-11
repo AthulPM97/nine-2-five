@@ -3,15 +3,12 @@ import { TamaguiProvider } from 'tamagui';
 import { SplashScreen, Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
 import * as Notifications from 'expo-notifications';
+import { AppState, Platform } from 'react-native';
+import * as KeepAwake from 'expo-keep-awake';
 
 import config from '../tamagui.config';
 import useColorSchemeStore from '~/store/colorSchemeStore';
-
-// --- Add these imports for app state/background handling ---
-import { AppState, Platform } from 'react-native';
 import useTimerStore from '~/store/timerStore';
-import * as KeepAwake from 'expo-keep-awake';
-// ----------------------------------------------------------
 
 SplashScreen.preventAutoHideAsync();
 
@@ -30,18 +27,17 @@ Notifications.setNotificationHandler({
 });
 
 export default function RootLayout() {
+  // Load fonts
   const [loaded] = useFonts({
     Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
     InterBold: require('@tamagui/font-inter/otf/Inter-Bold.otf'),
   });
 
-  const { colorScheme, toggleColorScheme } = useColorSchemeStore();
-
-  // --- App state and background handling logic START ---
+  const { colorScheme } = useColorSchemeStore();
   const { isRunning, isPaused, setBackgroundMode, syncTimerWithRealTime } = useTimerStore();
 
+  // Request notification permissions on mount
   useEffect(() => {
-    // Request permissions on mount
     Notifications.requestPermissionsAsync();
   }, []);
 
@@ -57,7 +53,6 @@ export default function RootLayout() {
         }
       }
     });
-
     return () => {
       subscription.remove();
     };
@@ -72,15 +67,14 @@ export default function RootLayout() {
         KeepAwake.deactivateKeepAwake();
       }
     }
-
     return () => {
       if (Platform.OS !== 'web') {
         KeepAwake.deactivateKeepAwake();
       }
     };
   }, [isRunning, isPaused]);
-  // --- App state and background handling logic END ---
 
+  // Hide splash screen when fonts are loaded
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();

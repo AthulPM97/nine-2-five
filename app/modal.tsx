@@ -5,8 +5,13 @@ import { YStack, Button, Theme, Text } from 'tamagui';
 import { Alert, Platform } from 'react-native';
 import useColorSchemeStore from '~/store/colorSchemeStore';
 import useTimerStore from '~/store/timerStore';
+import { Download } from 'lucide-react-native';
+import { StatusBar } from 'react-native';
+import { useTheme } from 'tamagui';
 
 export default function Modal() {
+  const theme = useTheme();
+
   const { exportData } = useTimerStore();
 
   const { colorScheme, setColorScheme } = useColorSchemeStore();
@@ -48,6 +53,10 @@ export default function Modal() {
   return (
     <Theme name={colorScheme}>
       <SafeAreaView style={{ flex: 1 }}>
+        <StatusBar
+          barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+          backgroundColor={theme.background.val}
+        />
         <YStack f={1} bg="$background" ai="center" p="$4" gap="$4">
           <Text color="$color" fontSize={20} fontWeight="bold">
             Settings
@@ -62,7 +71,12 @@ export default function Modal() {
           </Button>
 
           {/* Export Data Button */}
-          <Button size="$3" color="$color" borderRadius="$4" onPress={handleExportData}>
+          <Button
+            size="$3"
+            color="$color"
+            borderRadius="$4"
+            onPress={handleExportData}
+            iconAfter={<Download color={'green'} />}>
             Save your data
           </Button>
         </YStack>
