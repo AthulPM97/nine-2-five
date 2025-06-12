@@ -1,9 +1,9 @@
 export default {
   expo: {
-    name: '9to5',
+    name: 'nine-2-five',
     slug: 'nine-2-five',
     version: '1.0.0',
-    scheme: '9to5',
+    scheme: 'nine-2-five',
     web: {
       bundler: 'metro',
       output: 'static',
@@ -31,7 +31,7 @@ export default {
         foregroundImage: './assets/adaptive-icon.png',
         backgroundColor: '#ffffff',
       },
-      package: 'com.chandlerbong.nine2five.dev',
+      package: 'com.chandlerbong.nine2five',
     },
     extra: {
       router: {},
