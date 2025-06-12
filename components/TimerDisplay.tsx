@@ -1,6 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { YStack, Text, useTheme } from 'tamagui';
 import { Svg, Circle } from 'react-native-svg';
-import Colors from '~/constants/colors';
 
 interface TimerDisplayProps {
   timeRemaining: number;
@@ -13,6 +12,8 @@ export default function TimerDisplay({
   duration,
   isBackgroundMode = false,
 }: TimerDisplayProps) {
+  const theme = useTheme();
+
   // Format time as MM:SS
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -26,24 +27,25 @@ export default function TimerDisplay({
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference * (1 - progress);
 
+  // Theme-safe colors
+  const gray = theme.gray6?.val ?? '#ccc';
+  const primary = theme.blue10?.val ?? '#007aff';
+  const secondary = theme.blue8?.val ?? '#5dade2';
+  const textColor = theme.color?.val ?? '#222';
+  const secondaryColor = theme.blue8?.val ?? '#5dade2';
+  const labelColor = theme.gray10?.val ?? '#888';
+
   return (
-    <View style={styles.container}>
-      <Svg width={280} height={280} style={styles.svg}>
+    <YStack ai="center" jc="center" position="relative" width={280} height={120}>
+      <Svg width={280} height={280} style={{ position: 'absolute' }}>
         {/* Background circle */}
-        <Circle
-          cx="140"
-          cy="140"
-          r={radius}
-          stroke={Colors.light.gray}
-          strokeWidth="12"
-          fill="transparent"
-        />
+        <Circle cx="140" cy="140" r={radius} stroke={gray} strokeWidth="12" fill="transparent" />
         {/* Progress circle */}
         <Circle
           cx="140"
           cy="140"
           r={radius}
-          stroke={isBackgroundMode ? Colors.light.secondary : Colors.light.primary}
+          stroke={isBackgroundMode ? secondary : primary}
           strokeWidth="12"
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
@@ -52,45 +54,18 @@ export default function TimerDisplay({
           transform="rotate(-90, 140, 140)"
         />
       </Svg>
-      <View style={styles.timeContainer}>
-        <Text style={[styles.timeText, isBackgroundMode && styles.backgroundTimeText]}>
+      <YStack ai="center" jc="center" f={1} width="100%" height="100%">
+        <Text fontSize={56} fontWeight="300" color={isBackgroundMode ? secondaryColor : textColor}>
           {formatTime(timeRemaining)}
         </Text>
-        <Text style={styles.labelText}>
+        <Text fontSize={16} color={labelColor} mt="$2">
           {timeRemaining === 0
             ? "Time's up!"
             : isBackgroundMode
               ? 'running in background'
               : 'remaining'}
         </Text>
-      </View>
-    </View>
+      </YStack>
+    </YStack>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  svg: {
-    position: 'absolute',
-  },
-  timeContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  timeText: {
-    fontSize: 56,
-    fontWeight: '300',
-    color: Colors.light.text,
-  },
-  backgroundTimeText: {
-    color: Colors.light.secondary,
-  },
-  labelText: {
-    fontSize: 16,
-    color: Colors.light.darkGray,
-    marginTop: 8,
-  },
-});

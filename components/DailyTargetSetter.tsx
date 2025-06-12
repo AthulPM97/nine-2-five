@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Platform } from 'react-native';
-import Colors from '~/constants/colors';
+import { Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Check, Minus, Plus } from 'lucide-react-native';
 import useTimerStore from '~/store/timerStore';
+import { YStack, XStack, Button, Text, Input, useTheme } from 'tamagui';
 
 interface DailyTargetSetterProps {
   onClose?: () => void;
@@ -11,12 +11,13 @@ interface DailyTargetSetterProps {
 
 export default function DailyTargetSetter({ onClose }: DailyTargetSetterProps) {
   const { dailyTarget, setDailyTarget } = useTimerStore();
+  const theme = useTheme();
 
   // Convert seconds to hours for display
   const initialHours = Math.floor(dailyTarget / 3600);
   const [hours, setHours] = useState(initialHours.toString());
 
-  const MIN_HOURS = 4;
+  const MIN_HOURS = 1;
   const MAX_HOURS = 9;
 
   const triggerHaptic = () => {
@@ -62,118 +63,74 @@ export default function DailyTargetSetter({ onClose }: DailyTargetSetterProps) {
       hoursValue = Math.max(MIN_HOURS, Math.min(hoursValue, MAX_HOURS));
     }
 
-    setDailyTarget(hoursValue);
+    setDailyTarget(hoursValue * 3600);
     if (onClose) onClose();
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Set Daily Study Target</Text>
-      <Text style={styles.description}>Set your daily study goal between 4-9 hours</Text>
+    <YStack bg="$background" p="$5" borderRadius={16} ai="center" gap="$4" width="100%">
+      <Text fontSize={20} fontWeight="600" color="$color" mb="$1">
+        Set Your Target Hours
+      </Text>
 
-      <View style={styles.inputContainer}>
-        <TouchableOpacity
-          style={styles.button}
+      <XStack ai="center" gap="$3" mb="$3">
+        <Button
+          size="$4"
+          circular
+          bg="$gray3"
           onPress={decreaseHours}
           disabled={parseInt(hours) <= MIN_HOURS}>
           <Minus
             size={20}
-            color={parseInt(hours) <= MIN_HOURS ? Colors.light.gray : Colors.light.text}
+            color={parseInt(hours) <= MIN_HOURS ? theme.gray8?.val : theme.color?.val}
           />
-        </TouchableOpacity>
+        </Button>
 
-        <View style={styles.inputWrapper}>
-          <TextInput
-            style={styles.input}
+        <XStack ai="center">
+          <Input
+            size="$5"
+            fontSize={28}
+            fontWeight="600"
+            color="$color"
+            textAlign="center"
             value={hours}
             onChangeText={handleInputChange}
             keyboardType="number-pad"
             maxLength={1}
+            width={60}
+            borderWidth={0}
+            bg="transparent"
           />
-          <Text style={styles.hoursLabel}>hours</Text>
-        </View>
+          <Text fontSize={18} color="$gray10">
+            hours
+          </Text>
+        </XStack>
 
-        <TouchableOpacity
-          style={styles.button}
+        <Button
+          size="$4"
+          circular
+          bg="$gray3"
           onPress={increaseHours}
           disabled={parseInt(hours) >= MAX_HOURS}>
           <Plus
             size={20}
-            color={parseInt(hours) >= MAX_HOURS ? Colors.light.gray : Colors.light.text}
+            color={parseInt(hours) >= MAX_HOURS ? theme.gray8?.val : theme.color?.val}
           />
-        </TouchableOpacity>
-      </View>
+        </Button>
+      </XStack>
 
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Check size={20} color="#FFF" />
-        <Text style={styles.saveButtonText}>Save Target</Text>
-      </TouchableOpacity>
-    </View>
+      <Button
+        bg="$blue10"
+        color="$background"
+        borderRadius={12}
+        px="$5"
+        fontWeight="600"
+        fontSize={16}
+        onPress={handleSave}
+        icon={<Check size={20} color={theme.background?.val ?? '#FFF'} />}
+        minWidth={140}>
+        Save Target
+      </Button>
+    </YStack>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: Colors.light.background,
-    padding: 20,
-    borderRadius: 16,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: Colors.light.text,
-    marginBottom: 8,
-  },
-  description: {
-    fontSize: 16,
-    color: Colors.light.darkGray,
-    marginBottom: 24,
-    textAlign: 'center',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  button: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: Colors.light.lightGray,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 16,
-  },
-  input: {
-    fontSize: 32,
-    fontWeight: '600',
-    color: Colors.light.text,
-    textAlign: 'center',
-    minWidth: 50,
-  },
-  hoursLabel: {
-    fontSize: 18,
-    color: Colors.light.darkGray,
-    marginLeft: 8,
-  },
-  saveButton: {
-    flexDirection: 'row',
-    backgroundColor: Colors.light.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  saveButtonText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});

@@ -1,15 +1,21 @@
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
-import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import { Platform, Alert } from 'react-native';
+import * as FileSystem from 'expo-file-system';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { YStack, Button, Theme, Text } from 'tamagui';
+import { Alert, Platform } from 'react-native';
+import useColorSchemeStore from '~/store/colorSchemeStore';
 import useTimerStore from '~/store/timerStore';
-import Colors from '~/constants/colors';
-import { View } from 'tamagui';
 import { Download } from 'lucide-react-native';
+import { StatusBar } from 'react-native';
+import { useTheme } from 'tamagui';
 
 export default function Modal() {
+  const theme = useTheme();
+
   const { exportData } = useTimerStore();
-  // Download/export handler
+
+  const { colorScheme, setColorScheme } = useColorSchemeStore();
+
   const handleExportData = async () => {
     try {
       const json = await exportData();
@@ -43,42 +49,38 @@ export default function Modal() {
       Alert.alert('Export failed', 'Could not export data: ' + (err as Error).message);
     }
   };
+
   return (
-    <View style={styles.container}>
-      {/* <Text style={styles.title}>Download your data</Text> */}
-      <TouchableOpacity style={styles.button} onPress={handleExportData}>
-        <View style={styles.buttonContainer}>
-          <Download />
-          <Text style={styles.buttonText}>Save your data</Text>
-        </View>
-      </TouchableOpacity>
-    </View>
+    <Theme name={colorScheme}>
+      <SafeAreaView style={{ flex: 1 }}>
+        <StatusBar
+          barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+          backgroundColor={theme.background.val}
+        />
+        <YStack f={1} bg="$background" ai="center" p="$4" gap="$4">
+          <Text color="$color" fontSize={20} fontWeight="bold">
+            Settings
+          </Text>
+          <Button
+            bg="$background"
+            color="$color"
+            borderWidth={1}
+            borderColor="$primary"
+            onPress={() => setColorScheme(colorScheme === 'dark' ? 'light' : 'dark')}>
+            Switch to{colorScheme === 'dark' ? 'Light' : 'Dark'}Mode
+          </Button>
+
+          {/* Export Data Button */}
+          <Button
+            size="$3"
+            color="$color"
+            borderRadius="$4"
+            onPress={handleExportData}
+            iconAfter={<Download color={'green'} />}>
+            Save your data
+          </Button>
+        </YStack>
+      </SafeAreaView>
+    </Theme>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.light.background,
-    padding: 20,
-  },
-  button: {
-    backgroundColor: Colors.light.primary,
-    padding: 12,
-    borderRadius: 10,
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  buttonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
-  title: {
-    fontSize: 14,
-    color: Colors.light.darkGray,
-    marginBottom: 8,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-});

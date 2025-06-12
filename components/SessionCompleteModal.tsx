@@ -1,107 +1,58 @@
-import { View, Text, StyleSheet, Modal, TouchableOpacity } from 'react-native';
-import Colors from '~/constants/colors';
+import { Modal } from 'react-native';
+import { YStack, Text, Button, useTheme } from 'tamagui';
 import { CheckCircle } from 'lucide-react-native';
 
 interface SessionCompleteModalProps {
   visible: boolean;
   onClose: () => void;
-  duration: number;
 }
 
-export default function SessionCompleteModal({
-  visible,
-  onClose,
-  duration,
-}: SessionCompleteModalProps) {
-  // Format duration as MM:SS
-  const formatDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-
-    if (mins < 60) {
-      return `${mins} minute${mins !== 1 ? 's' : ''}`;
-    } else {
-      const hours = Math.floor(mins / 60);
-      const remainingMins = mins % 60;
-      return `${hours} hour${hours !== 1 ? 's' : ''} ${remainingMins > 0 ? `${remainingMins} minute${remainingMins !== 1 ? 's' : ''}` : ''}`;
-    }
-  };
-
+export default function SessionCompleteModal({ visible, onClose }: SessionCompleteModalProps) {
+  const theme = useTheme();
   return (
-    <Modal animationType="fade" transparent={true} visible={visible} onRequestClose={onClose}>
-      <View style={styles.centeredView}>
-        <View style={styles.modalView}>
-          <CheckCircle color={Colors.light.success} size={60} />
-          <Text style={styles.modalTitle}>Session Complete!</Text>
-          <Text style={styles.modalText}>
-            You've completed a {formatDuration(duration)} study session.
+    <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
+      <YStack
+        f={1}
+        jc="center"
+        ai="center"
+        bg="rgba(0,0,0,0.5)"
+        position="absolute"
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}>
+        <YStack
+          bg="$background"
+          borderRadius={20}
+          p="$6"
+          ai="center"
+          width="85%"
+          maxWidth={400}
+          shadowColor="$shadowColor"
+          shadowOffset={{ width: 0, height: 2 }}
+          shadowOpacity={0.25}
+          shadowRadius={4}
+          elevation={5}>
+          <CheckCircle color={theme.green10?.val ?? '#22c55e'} size={60} />
+          <Text mt="$3" fontSize={24} fontWeight="600" color="$color" mb="$2">
+            Session Complete!
           </Text>
-          <Text style={styles.modalSubtext}>
-            Great job! Take a short break before starting another session.
+          <Text mb="$4" textAlign="center" fontSize={16} color="$gray10">
+            Good job! Take a short break before starting next session.
           </Text>
-          <TouchableOpacity style={styles.button} onPress={onClose}>
-            <Text style={styles.buttonText}>Close</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+          <Button
+            bg="$blue10"
+            color="$color"
+            borderRadius={12}
+            px="$6"
+            fontWeight="600"
+            fontSize={16}
+            onPress={onClose}
+            minWidth={120}>
+            Close
+          </Button>
+        </YStack>
+      </YStack>
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-    width: '85%',
-    maxWidth: 400,
-  },
-  modalTitle: {
-    marginTop: 15,
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.light.text,
-    marginBottom: 10,
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: 'center',
-    fontSize: 18,
-    color: Colors.light.text,
-  },
-  modalSubtext: {
-    marginBottom: 20,
-    textAlign: 'center',
-    fontSize: 16,
-    color: Colors.light.darkGray,
-  },
-  button: {
-    backgroundColor: Colors.light.primary,
-    borderRadius: 12,
-    padding: 12,
-    elevation: 2,
-    minWidth: 120,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-});

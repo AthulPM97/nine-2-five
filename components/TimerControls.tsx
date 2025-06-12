@@ -1,6 +1,5 @@
-import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
+import { XStack, YStack, Button, Text, useTheme } from 'tamagui';
 import { Play, Pause, RotateCcw, Square } from 'lucide-react-native';
-import Colors from '~/constants/colors';
 import { Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
@@ -30,107 +29,85 @@ export default function TimerControls({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
   };
+  const theme = useTheme();
+
+  // Use Tamagui theme values for icon colors
+  const iconColor = theme.color?.val ?? '#000';
 
   return (
-    <View style={styles.container}>
+    <YStack mt="$6" ai="center">
       {!isRunning && !isPaused ? (
-        <TouchableOpacity
-          style={[styles.button, styles.primaryButton]}
+        <Button
+          bg="$blue10"
+          color="$background"
+          minWidth={120}
+          borderRadius={12}
           onPress={() => {
             triggerHaptic();
             onStart();
-          }}>
-          <Play color="#FFF" size={24} />
-          <Text style={styles.buttonText}>Start</Text>
-        </TouchableOpacity>
+          }}
+          icon={<Play color={iconColor} size={20} />}>
+          <Text color="$color" fontWeight="600" fontSize={16}>
+            Start
+          </Text>
+        </Button>
       ) : (
-        <View style={styles.controlsRow}>
+        <XStack jc="center" gap="$4">
           {isRunning && !isBackgroundMode ? (
-            <TouchableOpacity
-              style={[styles.button, styles.secondaryButton]}
+            <Button
+              bg="$background"
+              borderWidth={1}
+              borderColor="$gray6"
+              color="$color"
+              borderRadius={12}
+              gap="$2"
               onPress={() => {
                 triggerHaptic();
                 onPause();
-              }}>
-              <Pause color={Colors.light.text} size={24} />
-              <Text style={styles.secondaryButtonText}>Pause</Text>
-            </TouchableOpacity>
+              }}
+              icon={<Pause color={iconColor} size={24} />}
+            />
           ) : isPaused ? (
-            <TouchableOpacity
-              style={[styles.button, styles.primaryButton]}
+            <Button
+              bg="$blue10"
+              color="$color"
+              borderRadius={12}
+              gap="$2"
               onPress={() => {
                 triggerHaptic();
                 onResume();
-              }}>
-              <Play color="#FFF" size={24} />
-              <Text style={styles.buttonText}>Resume</Text>
-            </TouchableOpacity>
+              }}
+              icon={<Play color={iconColor} size={24} />}
+            />
           ) : null}
 
-          <TouchableOpacity
-            style={[styles.button, styles.secondaryButton]}
+          <Button
+            bg="$background"
+            borderWidth={1}
+            borderColor="$gray6"
+            color="$color"
+            borderRadius={12}
+            gap="$2"
             onPress={() => {
               triggerHaptic();
               onReset();
-            }}>
-            <RotateCcw color={Colors.light.text} size={24} />
-            <Text style={styles.secondaryButtonText}>Reset</Text>
-          </TouchableOpacity>
+            }}
+            icon={<RotateCcw color={iconColor} size={24} />}
+          />
 
-          <TouchableOpacity
-            style={[styles.button, styles.dangerButton]}
+          <Button
+            bg="$red10"
+            color="$background"
+            borderRadius={12}
+            gap="$2"
             onPress={() => {
               triggerHaptic();
               onStop();
-            }}>
-            <Square color="#FFF" size={24} />
-            <Text style={styles.buttonText}>Stop</Text>
-          </TouchableOpacity>
-        </View>
+            }}
+            icon={<Square color={iconColor} size={24} />}
+          />
+        </XStack>
       )}
-    </View>
+    </YStack>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginTop: 40,
-    alignItems: 'center',
-  },
-  controlsRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 16,
-  },
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    gap: 8,
-  },
-  primaryButton: {
-    backgroundColor: Colors.light.primary,
-    minWidth: 120,
-  },
-  secondaryButton: {
-    backgroundColor: Colors.light.lightGray,
-    borderWidth: 1,
-    borderColor: Colors.light.gray,
-  },
-  dangerButton: {
-    backgroundColor: Colors.light.error,
-  },
-  buttonText: {
-    color: '#FFF',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-  secondaryButtonText: {
-    color: Colors.light.text,
-    fontWeight: '600',
-    fontSize: 16,
-  },
-});

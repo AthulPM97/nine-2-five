@@ -108,13 +108,19 @@ const useTimerStore = create<TimerState>()(
       },
 
       setDailyTarget: (hours) => {
-        // Convert hours to seconds and validate
-        const targetInSeconds = Math.max(
-          MIN_DAILY_TARGET,
-          Math.min(hours * 60 * 60, MAX_DAILY_TARGET)
+        // Input validation - if hours is > 100, assume it's in seconds
+        const actualHours = hours > 100 ? hours / 3600 : hours;
+
+        // Convert to seconds
+        const targetInSeconds = actualHours * 60 * 60;
+
+        // Validate against min/max
+        const clampedSeconds = Math.min(
+          Math.max(targetInSeconds, MIN_DAILY_TARGET),
+          MAX_DAILY_TARGET
         );
 
-        set({ dailyTarget: targetInSeconds });
+        set({ dailyTarget: clampedSeconds });
       },
 
       setCurrentTag: (tag) => {

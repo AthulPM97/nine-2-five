@@ -1,5 +1,4 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import Colors from '~/constants/colors';
+import { YStack, XStack, Text, ScrollView, View } from 'tamagui';
 import { TagStats } from '~/types/timer';
 
 interface TagStatsChartProps {
@@ -9,9 +8,11 @@ interface TagStatsChartProps {
 export default function TagStatsChart({ tagStats }: TagStatsChartProps) {
   if (tagStats.length === 0) {
     return (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>No subject data yet</Text>
-      </View>
+      <YStack f={1} jc="center" ai="center" p="$5">
+        <Text color="$gray10" fontSize={16} ta="center">
+          No subject data yet
+        </Text>
+      </YStack>
     );
   }
 
@@ -33,82 +34,42 @@ export default function TagStatsChart({ tagStats }: TagStatsChartProps) {
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView f={1} showsVerticalScrollIndicator={false}>
       {tagStats.map((stat, index) => (
-        <View key={stat.tag} style={styles.statItem}>
-          <View style={styles.tagHeader}>
-            <Text style={styles.tagName}>{stat.tag}</Text>
-            <Text style={styles.sessionCount}>
+        <YStack key={stat.tag} mb="$4">
+          <XStack jc="space-between" ai="center" mb="$2">
+            <Text color="$color" fontSize={16} fontWeight="600">
+              {stat.tag}
+            </Text>
+            <Text color="$gray10" fontSize={14}>
               {stat.sessionCount} session{stat.sessionCount !== 1 ? 's' : ''}
             </Text>
-          </View>
+          </XStack>
 
-          <View style={styles.barContainer}>
+          <XStack ai="center" height={24}>
             <View
-              style={[
-                styles.bar,
-                { width: `${(stat.totalSeconds / maxSeconds) * 100}%` },
-                index === 0 ? styles.topBar : null,
-              ]}
-            />
-            <Text style={styles.timeLabel}>{formatTime(stat.totalSeconds)}</Text>
-          </View>
-        </View>
+              f={1}
+              mr="$2"
+              position="relative"
+              height="100%"
+              overflow="hidden"
+              borderRadius={4}>
+              <View
+                position="absolute"
+                left={0}
+                top={0}
+                bottom={0}
+                bg={index === 0 ? '$blue10' : '$blue8'}
+                width={`${(stat.totalSeconds / maxSeconds) * 100}%`}
+                borderRadius={4}
+              />
+            </View>
+            <Text color="$gray10" fontSize={14} fontWeight="500">
+              {formatTime(stat.totalSeconds)}
+            </Text>
+          </XStack>
+        </YStack>
       ))}
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: Colors.light.darkGray,
-    textAlign: 'center',
-  },
-  statItem: {
-    marginBottom: 16,
-  },
-  tagHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  tagName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.light.text,
-  },
-  sessionCount: {
-    fontSize: 14,
-    color: Colors.light.darkGray,
-  },
-  barContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: 24,
-  },
-  bar: {
-    height: '100%',
-    backgroundColor: Colors.light.primary,
-    borderRadius: 4,
-    marginRight: 8,
-  },
-  topBar: {
-    backgroundColor: Colors.light.secondary,
-  },
-  timeLabel: {
-    fontSize: 14,
-    color: Colors.light.darkGray,
-    fontWeight: '500',
-  },
-});
