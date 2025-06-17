@@ -4,11 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TimerState, StudySession } from '~/types/timer';
 import { Platform } from 'react-native';
 import { MAX_DURATION, MIN_DAILY_TARGET, MAX_DAILY_TARGET } from './timerConstants';
-import {
-  defineBackgroundTask,
-  registerBackgroundTask,
-  unregisterBackgroundTask,
-} from './backgroundTasks';
+import { useBackgroundTaskStore } from './backgroundTaskStore';
 import {
   completeSessionSelector,
   exportDataSelector,
@@ -26,7 +22,7 @@ const useTimerStore = create<TimerState>()(
       isRunning: false,
       isPaused: false,
       sessions: [] as StudySession[],
-      dailyTarget: 4 * 60 * 60, // Default 4 hours
+      dailyTarget: 2 * 60 * 60, // Default 2 hours
       dailyProgress: [],
       currentTag: '',
       recentTags: [],
@@ -42,9 +38,10 @@ const useTimerStore = create<TimerState>()(
       },
 
       startTimer: async () => {
-        // Register background task when timer starts
+        await Notifications.cancelAllScheduledNotificationsAsync();
+
         if (Platform.OS !== 'web') {
-          await registerBackgroundTask();
+          await useBackgroundTaskStore.getState().register();
         }
 
         set({
@@ -61,7 +58,7 @@ const useTimerStore = create<TimerState>()(
         await Notifications.cancelAllScheduledNotificationsAsync();
         // Unregister background task when timer pauses
         if (Platform.OS !== 'web') {
-          await unregisterBackgroundTask();
+          await useBackgroundTaskStore.getState().unregister();
         }
 
         set({
@@ -71,9 +68,12 @@ const useTimerStore = create<TimerState>()(
       },
 
       resumeTimer: async () => {
+        // Cancel any existing notifications
+        await Notifications.cancelAllScheduledNotificationsAsync();
+
         // Re-register background task when timer resumes
         if (Platform.OS !== 'web') {
-          await registerBackgroundTask();
+          await useBackgroundTaskStore.getState().register();
         }
 
         set({
@@ -91,7 +91,7 @@ const useTimerStore = create<TimerState>()(
 
         // Unregister background task when timer resets
         if (Platform.OS !== 'web') {
-          await unregisterBackgroundTask();
+          await useBackgroundTaskStore.getState().unregister();
         }
 
         set({
@@ -103,7 +103,6 @@ const useTimerStore = create<TimerState>()(
       },
 
       completeSession: async (completed) => {
-        await Notifications.cancelAllScheduledNotificationsAsync();
         await completeSessionSelector(get, set, completed);
       },
 
@@ -149,6 +148,6 @@ const useTimerStore = create<TimerState>()(
   )
 );
 
-defineBackgroundTask(useTimerStore);
+useBackgroundTaskStore.getState().defineTask();
 
 export default useTimerStore;

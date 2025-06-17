@@ -9,7 +9,7 @@ export default {
       output: 'static',
       favicon: './assets/favicon.png',
     },
-    plugins: ['expo-router', 'expo-font'],
+    plugins: ['expo-router', 'expo-font', 'expo-background-task', 'expo-notifications'],
     experiments: {
       typedRoutes: true,
       tsconfigPaths: true,
@@ -27,6 +27,7 @@ export default {
       supportsTablet: true,
     },
     android: {
+      useNextNotificationsApi: true,
       adaptiveIcon: {
         foregroundImage: './assets/adaptive-icon.png',
         backgroundColor: '#ffffff',

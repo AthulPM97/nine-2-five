@@ -8,12 +8,11 @@ interface DurationPickerProps {
 }
 
 const DURATIONS = [
-  { label: '1m', value: 1 * 60 },
   { label: '25m', value: 25 * 60 },
   { label: '45m', value: 45 * 60 },
   { label: '60m', value: 60 * 60 },
   { label: '90m', value: 90 * 60 },
-  // { label: '120m', value: 120 * 60 },
+  { label: '120m', value: 120 * 60 },
 ];
 
 export default function DurationPicker({
