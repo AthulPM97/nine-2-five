@@ -1,14 +1,17 @@
-import { useEffect } from 'react';
 import { TamaguiProvider } from 'tamagui';
 import { SplashScreen, Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
 import * as Notifications from 'expo-notifications';
-import { AppState, Platform } from 'react-native';
-import * as KeepAwake from 'expo-keep-awake';
-
+import { Platform } from 'react-native';
 import config from '../tamagui.config';
 import useColorSchemeStore from '~/store/colorSchemeStore';
 import useTimerStore from '~/store/timerStore';
+import {
+  useNotificationPermissions,
+  useAppStateHandler,
+  useKeepAwake,
+  useSplashScreen,
+} from '~/hooks/useAppEffects';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -17,12 +20,22 @@ export const unstable_settings = {
 };
 
 // Configure notification handling
+if (Platform.OS === 'android') {
+  Notifications.setNotificationChannelAsync('timer-complete', {
+    name: 'Timer Completion',
+    importance: Notifications.AndroidImportance.HIGH,
+    vibrationPattern: [0, 250, 250, 250],
+    lightColor: '#FF231F7C',
+    sound: 'default',
+  });
+}
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowList: true,
     shouldShowBanner: true,
+    shouldShowList: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
+    priority: Notifications.AndroidNotificationPriority.HIGH,
   }),
 });
 
@@ -36,50 +49,11 @@ export default function RootLayout() {
   const { colorScheme } = useColorSchemeStore();
   const { isRunning, isPaused, setBackgroundMode, syncTimerWithRealTime } = useTimerStore();
 
-  // Request notification permissions on mount
-  useEffect(() => {
-    Notifications.requestPermissionsAsync();
-  }, []);
-
-  // Handle app state changes (foreground/background)
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', (nextAppState) => {
-      if (nextAppState === 'active') {
-        setBackgroundMode(false);
-        syncTimerWithRealTime();
-      } else if (nextAppState === 'background' || nextAppState === 'inactive') {
-        if (isRunning && !isPaused) {
-          setBackgroundMode(true);
-        }
-      }
-    });
-    return () => {
-      subscription.remove();
-    };
-  }, [isRunning, isPaused, setBackgroundMode, syncTimerWithRealTime]);
-
-  // Keep screen awake when timer is running
-  useEffect(() => {
-    if (Platform.OS !== 'web') {
-      if (isRunning && !isPaused) {
-        KeepAwake.activateKeepAwakeAsync();
-      } else {
-        KeepAwake.deactivateKeepAwake();
-      }
-    }
-    return () => {
-      if (Platform.OS !== 'web') {
-        KeepAwake.deactivateKeepAwake();
-      }
-    };
-  }, [isRunning, isPaused]);
-
-  // Hide splash screen when fonts are loaded
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
+  // Custom hooks
+  useNotificationPermissions();
+  useAppStateHandler(isRunning, isPaused, setBackgroundMode, syncTimerWithRealTime);
+  useKeepAwake(isRunning, isPaused);
+  useSplashScreen(loaded);
 
   if (!loaded) return null;
 

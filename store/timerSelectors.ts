@@ -1,13 +1,13 @@
 import { Platform } from 'react-native';
 import { StudySession } from '~/types/timer';
 import { getTodayDateString, MAX_RECENT_TAGS } from './timerConstants';
-import { unregisterBackgroundTask } from './backgroundTasks';
 import { TimerState, TagStats } from '~/types/timer';
+import { useBackgroundTaskStore } from './backgroundTaskStore';
 
 export async function completeSessionSelector(get: any, set: any, completed: boolean) {
   // Unregister background task when session completes
   if (Platform.OS !== 'web') {
-    await unregisterBackgroundTask();
+    await useBackgroundTaskStore.getState().unregister();
   }
 
   const sessionDuration = get().duration - get().timeRemaining;
