@@ -47,7 +47,7 @@ export default function TimerControls({
             onStart();
           }}
           icon={<Play color={iconColor} size={20} />}>
-          <Text color="$color" fontWeight="600" fontSize={16}>
+          <Text color="$color" fontFamily="$mono" fontWeight="600" fontSize={16}>
             Start
           </Text>
         </Button>

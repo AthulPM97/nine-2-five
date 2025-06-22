@@ -12,6 +12,12 @@ import {
   useKeepAwake,
   useSplashScreen,
 } from '~/hooks/useAppEffects';
+import {
+  IBMPlexMono_400Regular,
+  IBMPlexMono_500Medium,
+  IBMPlexMono_600SemiBold,
+  IBMPlexMono_700Bold,
+} from '@expo-google-fonts/ibm-plex-mono';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -42,6 +48,10 @@ Notifications.setNotificationHandler({
 export default function RootLayout() {
   // Load fonts
   const [loaded] = useFonts({
+    IBMPlexMono_400Regular,
+    IBMPlexMono_500Medium,
+    IBMPlexMono_600SemiBold,
+    IBMPlexMono_700Bold,
     Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
     InterBold: require('@tamagui/font-inter/otf/Inter-Bold.otf'),
   });

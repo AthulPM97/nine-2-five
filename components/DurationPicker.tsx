@@ -27,7 +27,13 @@ export default function DurationPicker({
 
   return (
     <YStack mb="$6" ai="center">
-      <Text fontSize={16} fontWeight="600" color="$color" mb="$3" textAlign="center">
+      <Text
+        fontSize={16}
+        fontFamily="$mono"
+        fontWeight="600"
+        color="$color"
+        mb="$3"
+        textAlign="center">
         Session Duration
       </Text>
       <XStack gap="$2" flexWrap="wrap" jc="center">
@@ -50,7 +56,11 @@ export default function DurationPicker({
               pressStyle={{
                 bg: isSelected ? '$blue9' : '$gray4',
               }}>
-              <Text fontSize={16} color={isSelected ? '$background' : '$color'} fontWeight="500">
+              <Text
+                fontSize={16}
+                fontFamily="$mono"
+                color={isSelected ? '$background' : '$color'}
+                fontWeight="500">
                 {duration.label}
               </Text>
             </Button>

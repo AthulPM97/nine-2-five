@@ -46,7 +46,12 @@ export default function SessionHistoryItem({ session, isToday = false }: Session
       mb="$3"
       ai="center"
       borderLeftWidth={isToday ? 3 : 0}
-      borderLeftColor="$blue10">
+      borderLeftColor="$blue10"
+      elevation={1}
+      pressStyle={{
+        scale: 0.98,
+        opacity: 0.9,
+      }}>
       <XStack mr="$3">
         {session.completed ? (
           <CheckCircle color={theme.green10.val} size={24} />
@@ -56,18 +61,18 @@ export default function SessionHistoryItem({ session, isToday = false }: Session
       </XStack>
 
       <YStack f={1}>
-        <Text color="$color" fontSize={16} fontWeight="600" mb="$1">
+        <Text color="$color" fontFamily="$mono" fontSize={16} fontWeight="600" mb="$1">
           {isToday ? 'Today' : formatDate(session.date)}
         </Text>
 
         <XStack ai="center" mb="$1">
           <XStack ai="center" mr="$3">
             <Clock size={14} color={theme.gray10.val} />
-            <Text color="$gray10" fontSize={14} ml="$1">
+            <Text color="$gray10" fontFamily="$mono" fontSize={14} ml="$1">
               {formatTime(session.date)}
             </Text>
           </XStack>
-          <Text color="$gray10" fontSize={14} fontWeight="500">
+          <Text color="$gray10" fontFamily="$mono" fontSize={14} fontWeight="500">
             {formatDuration(session.duration)}
           </Text>
         </XStack>
@@ -75,7 +80,7 @@ export default function SessionHistoryItem({ session, isToday = false }: Session
         {session.tag && (
           <XStack ai="center">
             <Tag size={14} color={theme.blue10.val} />
-            <Text color="$blue10" fontSize={14} fontWeight="500" ml="$1">
+            <Text color="$blue10" fontFamily="$mono" fontSize={14} fontWeight="500" ml="$1">
               {session.tag}
             </Text>
           </XStack>
@@ -83,7 +88,11 @@ export default function SessionHistoryItem({ session, isToday = false }: Session
       </YStack>
 
       <XStack px="$2.5" py="$1" borderRadius={12}>
-        <Text fontSize={14} fontWeight="600" color={session.completed ? '$green10' : '$red10'}>
+        <Text
+          fontSize={14}
+          fontFamily="$mono"
+          fontWeight="600"
+          color={session.completed ? '$green10' : '$red10'}>
           {session.completed ? 'Completed' : 'Stopped'}
         </Text>
       </XStack>

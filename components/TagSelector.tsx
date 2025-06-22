@@ -90,6 +90,7 @@ export default function TagSelector({ onTagSelected, onCancel }: TagSelectorProp
             <XStack gap="$2">
               {recentTags.map((item) => (
                 <Button
+                  elevation={1}
                   key={item}
                   bg="$gray4"
                   borderRadius={20}

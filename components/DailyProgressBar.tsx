@@ -32,10 +32,10 @@ export default function DailyProgressBar({ currentSeconds, targetSeconds }: Dail
   return (
     <YStack my="$2">
       <XStack jc="space-between" mb="$2">
-        <Text fontSize={14} color="$color" fontWeight="500">
+        <Text fontSize={14} fontFamily="$mono" color="$color" fontWeight="500">
           {formatProgress(currentSeconds)} of {formatProgress(targetSeconds)}
         </Text>
-        <Text fontSize={14} color="$gray10">
+        <Text fontSize={14} fontFamily="$mono" color="$gray10">
           {formatTimeRemaining(currentSeconds)}
         </Text>
       </XStack>

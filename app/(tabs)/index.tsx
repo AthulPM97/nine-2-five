@@ -131,18 +131,18 @@ export default function TimerScreen() {
           <YStack gap="$2.5">
             {/* Header */}
             <YStack mb="$3" ai="center">
-              <Text fontSize={28} fontWeight="700" color="$color" mb="$2">
+              <Text fontFamily="$mono" fontSize={28} fontWeight="700" color="$color" mb="$2">
                 Focus Time
               </Text>
-              <Text fontSize={16} color="$gray10">
+              <Text fontSize={16} fontFamily="$mono" color="$gray10">
                 Stay productive and focused
               </Text>
             </YStack>
 
             {/* Daily Target Progress */}
-            <YStack bg="$gray4" borderRadius={16} p="$4" mb="$5">
+            <YStack bg="$gray4" borderRadius={16} p="$4" mb="$5" elevation={10}>
               <XStack jc="space-between" ai="center" mb="$3">
-                <Text fontSize={16} fontWeight="600" color="$color">
+                <Text fontSize={16} fontFamily="$mono" fontWeight="600" color="$color">
                   Daily Target
                 </Text>
                 <Button
@@ -150,7 +150,7 @@ export default function TimerScreen() {
                   size="$2"
                   onPress={() => setShowTargetModal(true)}
                   icon={<Target size={16} color={theme.blue10.val} />}>
-                  <Text fontSize={14} color="$blue10" fontWeight="500">
+                  <Text fontSize={14} fontFamily="$mono" color="$blue10" fontWeight="500">
                     Set Target
                   </Text>
                 </Button>

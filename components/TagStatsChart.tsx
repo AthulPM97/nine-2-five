@@ -38,10 +38,10 @@ export default function TagStatsChart({ tagStats }: TagStatsChartProps) {
       {tagStats.map((stat, index) => (
         <YStack key={stat.tag} mb="$4">
           <XStack jc="space-between" ai="center" mb="$2">
-            <Text color="$color" fontSize={16} fontWeight="600">
+            <Text color="$color" fontFamily="$mono" fontSize={16} fontWeight="600">
               {stat.tag}
             </Text>
-            <Text color="$gray10" fontSize={14}>
+            <Text color="$gray10" fontFamily="$mono" fontSize={14}>
               {stat.sessionCount} session{stat.sessionCount !== 1 ? 's' : ''}
             </Text>
           </XStack>
@@ -64,7 +64,7 @@ export default function TagStatsChart({ tagStats }: TagStatsChartProps) {
                 borderRadius={4}
               />
             </View>
-            <Text color="$gray10" fontSize={14} fontWeight="500">
+            <Text color="$gray10" fontFamily="$mono" fontSize={14} fontWeight="500">
               {formatTime(stat.totalSeconds)}
             </Text>
           </XStack>

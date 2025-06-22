@@ -58,7 +58,7 @@ export default function Modal() {
           backgroundColor={theme.background.val}
         />
 
-        <YStack f={1} bg="$background">
+        <YStack f={1} bg="$background" opacity={0.95}>
           {/* Header */}
           <XStack
             backgroundColor="$background"
@@ -75,7 +75,13 @@ export default function Modal() {
               onPress={() => router.back()}
               icon={<ArrowLeft size={24} color={theme.color?.val} />}
             />
-            <Text flex={1} textAlign="center" fontSize={18} fontWeight="600" color="$color">
+            <Text
+              flex={1}
+              textAlign="center"
+              fontFamily="$mono"
+              fontSize={18}
+              fontWeight="600"
+              color="$color">
               Settings
             </Text>
             <View width={24} />
@@ -84,8 +90,8 @@ export default function Modal() {
           {/* Content */}
           <YStack p="$4" gap="$4">
             {/* Theme Section */}
-            <YStack bg="$gray4" borderRadius={16} p="$4">
-              <Text fontSize={16} fontWeight="600" color="$color" mb="$3">
+            <YStack bg="$gray4" borderRadius={16} p="$4" elevation={5}>
+              <Text fontSize={16} fontWeight="600" fontFamily="$mono" color="$color" mb="$3">
                 App Theme
               </Text>
               <Button
@@ -102,11 +108,11 @@ export default function Modal() {
                     ) : (
                       <Sun size={20} color={theme.color?.val} />
                     )}
-                    <Text fontSize={16} color="$color">
+                    <Text fontSize={16} color="$color" fontFamily="$mono">
                       {colorScheme === 'dark' ? 'Dark Mode' : 'Light Mode'}
                     </Text>
                   </XStack>
-                  <Text fontSize={14} color="$gray10">
+                  <Text fontSize={14} color="$gray10" fontFamily="$mono">
                     Tap to switch
                   </Text>
                 </XStack>
@@ -114,8 +120,8 @@ export default function Modal() {
             </YStack>
 
             {/* Data Export Section */}
-            <YStack bg="$gray4" borderRadius={16} p="$4">
-              <Text fontSize={16} fontWeight="600" color="$color" mb="$3">
+            <YStack bg="$gray4" borderRadius={16} p="$4" elevation={5}>
+              <Text fontSize={16} fontWeight="600" fontFamily="$mono" color="$color" mb="$3">
                 Data Management
               </Text>
               <Button
@@ -128,11 +134,11 @@ export default function Modal() {
                 <XStack ai="center" jc="space-between" width="100%">
                   <XStack ai="center" gap="$2">
                     <Download size={20} color={theme.blue10?.val} />
-                    <Text fontSize={16} color="$color">
+                    <Text fontSize={16} fontFamily="$mono" color="$color">
                       Export Study Data
                     </Text>
                   </XStack>
-                  <Text fontSize={14} color="$gray10">
+                  <Text fontSize={14} fontFamily="$mono" color="$gray10">
                     Save as JSON
                   </Text>
                 </XStack>

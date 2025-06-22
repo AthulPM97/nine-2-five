@@ -55,10 +55,14 @@ export default function TimerDisplay({
         />
       </Svg>
       <YStack ai="center" jc="center" f={1} width="100%" height="100%">
-        <Text fontSize={56} fontWeight="300" color={isBackgroundMode ? secondaryColor : textColor}>
+        <Text
+          fontSize={56}
+          fontFamily="$mono"
+          fontWeight="300"
+          color={isBackgroundMode ? secondaryColor : textColor}>
           {formatTime(timeRemaining)}
         </Text>
-        <Text fontSize={16} color={labelColor} mt="$2">
+        <Text fontSize={16} fontFamily="$mono" color={labelColor} mt="$2">
           {timeRemaining === 0
             ? "Time's up!"
             : isBackgroundMode
