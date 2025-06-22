@@ -19,7 +19,7 @@ eas build --platform android --profile production
 build only takes the committed changes, not the local uncommited changes.
 So always commit before building.
 
-Build preview (builds an apk)
+Build preview (builds an standalone apk)
 ```
 eas build --platform android --profile preview
 ```
