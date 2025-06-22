@@ -32,7 +32,7 @@ export default {
         foregroundImage: './assets/adaptive-icon.png',
         backgroundColor: '#ffffff',
       },
-      package: 'com.chandlerbong.9to5',
+      package: 'com.chandlerbong.nine2five.dev',
     },
     extra: {
       router: {},
