@@ -24,7 +24,7 @@ Build preview (builds an standalone apk)
 eas build --platform android --profile preview
 ```
 
-Expo doctor
+Expo doctor run before committing and building
 ```
 npx expo-doctor
 ```

@@ -1,19 +1,52 @@
 import { YStack, XStack, Text, ScrollView, View } from 'tamagui';
+import useTimerStore from '~/store/timerStore';
 import { TagStats } from '~/types/timer';
+import { getTodayDateString } from '~/utils/dateUtils';
 
 interface TagStatsChartProps {
-  tagStats: TagStats[];
+  selected: 'today' | 'till_date';
 }
 
-export default function TagStatsChart({ tagStats }: TagStatsChartProps) {
+export default function TagStatsChart({ selected }: TagStatsChartProps) {
+  const { sessions, getTagStats } = useTimerStore();
+  const today = getTodayDateString();
+
+  // Get stats based on selected range
+  const tagStats: TagStats[] =
+    selected === 'today'
+      ? getTagStatsForSessions(sessions.filter((session) => session.date.split('T')[0] === today))
+      : getTagStats();
+
   if (tagStats.length === 0) {
     return (
       <YStack f={1} jc="center" ai="center" p="$5">
         <Text color="$gray10" fontSize={16} ta="center">
-          No subject data yet
+          No subject data {selected === 'today' ? 'for today' : 'yet'}
         </Text>
       </YStack>
     );
+  }
+
+  // Get stats for specific sessions
+  function getTagStatsForSessions(filteredSessions: typeof sessions): TagStats[] {
+    const tagMap = new Map<string, { totalSeconds: number; sessionCount: number }>();
+
+    filteredSessions.forEach((session) => {
+      const tag = session.tag || 'Untagged';
+      const current = tagMap.get(tag) || { totalSeconds: 0, sessionCount: 0 };
+      tagMap.set(tag, {
+        totalSeconds: current.totalSeconds + session.duration,
+        sessionCount: current.sessionCount + 1,
+      });
+    });
+
+    return Array.from(tagMap.entries())
+      .map(([tag, stats]) => ({
+        tag,
+        totalSeconds: stats.totalSeconds,
+        sessionCount: stats.sessionCount,
+      }))
+      .sort((a, b) => b.totalSeconds - a.totalSeconds);
   }
 
   // Find the tag with the most time (for calculating relative bar widths)
