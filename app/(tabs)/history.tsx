@@ -74,7 +74,7 @@ export default function HistoryScreen() {
               Last 7 days
             </Text>
             <Text color="$color" fontFamily="$mono" fontSize={20} fontWeight="600">
-              {Math.floor(totalSeconds / 3600)} h {Math.floor((totalSeconds % 3600) / 60)} m
+              {formatTotalTime(totalSeconds)}
             </Text>
           </YStack>
         </XStack>

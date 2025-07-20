@@ -12,6 +12,6 @@ export const formatTotalTime = (seconds: number) => {
   } else {
     const hours = Math.floor(mins / 60);
     const remainingMins = mins % 60;
-    return `${hours} hour${hours !== 1 ? 's' : ''} ${remainingMins > 0 ? `${remainingMins} minute${remainingMins !== 1 ? 's' : ''}` : ''}`;
+    return `${hours} hr${hours !== 1 ? 's' : ''} ${remainingMins > 0 ? `${remainingMins} min${remainingMins !== 1 ? 's' : ''}` : ''}`;
   }
 };

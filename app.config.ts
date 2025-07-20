@@ -9,7 +9,13 @@ export default {
       output: 'static',
       favicon: './assets/favicon.png',
     },
-    plugins: ['expo-router', 'expo-font', 'expo-background-task', 'expo-notifications'],
+    plugins: [
+      'expo-router',
+      'expo-font',
+      'expo-background-task',
+      'expo-notifications',
+      'expo-web-browser',
+    ],
     experiments: {
       typedRoutes: true,
       tsconfigPaths: true,
